@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instituto Geográfico Militar del Uruguay</title>
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .igm-modal-overlay {
+    position: fixed; inset: 0; background: rgba(10, 20, 30, 0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+  }
+  .igm-modal-overlay.is-open { opacity: 1; pointer-events: auto; }
+  .igm-modal {
+    background: #fff; border-radius: 10px; max-width: 460px; width: 100%;
+    overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    transform: translateY(10px); transition: transform 0.25s ease;
+  }
+  .igm-modal-overlay.is-open .igm-modal { transform: translateY(0); }
+  .igm-modal img { width: 100%; display: block; max-height: 240px; object-fit: cover; }
+  .igm-modal-body { padding: 18px 22px 22px; position: relative; }
+  .igm-modal-close {
+    position: absolute; top: 10px; right: 12px; background: rgba(0,0,0,0.45);
+    color: #fff; border: none; width: 30px; height: 30px; border-radius: 50%;
+    font-size: 1.1rem; line-height: 1; cursor: pointer;
+  }
+  .igm-modal-close:hover { background: rgba(0,0,0,0.7); }
+  .igm-modal-fecha { font-size: 0.82rem; color: #777; margin: 14px 0 4px; }
+  .igm-modal-body h3 { margin: 0 0 12px; color: #14406b; }
+</style></head>
+<body>
+
+<div class="igm-modal-overlay" id="igm-noticia-modal" role="dialog" aria-modal="true" aria-labelledby="igm-modal-titulo">
+  <div class="igm-modal">
+    <button class="igm-modal-close" id="igm-modal-close" aria-label="Cerrar">&times;</button>
+    <img src="img/noticias/jornadas-ipgh-2026.jpg" alt="Jornadas de IPGH 2026">
+    <div class="igm-modal-body">
+      <div class="igm-modal-fecha">Publicado: 17 de Julio 2026</div>
+      <h3 id="igm-modal-titulo">Jornadas de IPGH 2026</h3>
+      <a href="articulos-igm.html" class="btn-entrar">Ver noticia</a>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="top-bar">
+    <a href="index.html" class="logo-wrap">
+      <img src="https://igm.gub.uy/wp-content/uploads/2017/05/logo.png" alt="Logo IGM">
+      <span class="logo-text">INSTITUTO GEOGRÁFICO<br>MILITAR DEL URUGUAY</span>
+    </a>
+  </div>
+    <nav class="main-nav">
+    <ul>
+      <li class="active"><a href="index.html">Inicio</a></li>
+      <li><a href="#">Institución</a>
+        <div class="dropdown">
+          <h5>Institución</h5>
+          <ul>
+            <li><a href="saludo-director-igm.html">Saludo del Director</a></li>
+            <li><a href="mision-y-vision-igm.html">Misión y Visión</a></li>
+            <li><a href="autoridades.html">Autoridades</a></li>
+            <li><a href="organizacion-igm.html">Organización</a></li>
+            <li><a href="ubicacion-igm.html">Ubicación</a></li>
+            <li><a href="historia-igm.html">Historia</a></li>
+            <li><a href="marco-juridico-igm.html">Marco Jurídico</a></li>
+            <li><a href="formulario-de-contacto.html">Contáctenos</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="#">Información Territorial</a>
+        <div class="dropdown">
+          <h5>Información Territorial</h5>
+          <ul>
+            <li><a href="limites-brasil-igm.html">Límites con Brasil</a></li>
+            <li><a href="limites-argentina-igm.html">Límites con Argentina</a></li>
+            <li><a href="puntos-extremos-igm.html">Puntos Extremos</a></li>
+            <li><a href="situacion-geografica-igm.html">Situación Geográfica</a></li>
+            <li><a href="division-politica-igm.html">División Política</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="productos-igm.html">Productos</a></li>
+      <li><a href="#">Servicios</a>
+        <div class="dropdown">
+          <h5>Servicios IGM</h5>
+          <ul>
+            <li><a href="geoportal-igm.html">Geoportal</a></li>
+            <li><a href="visaciones-igm.html">Visaciones</a></li>
+            <li><a href="capacitacion-igm.html">Capacitación</a></li>
+            <li><a href="mapas-antiguos-igm.html">Mapas Antiguos</a></li>
+            <li><a href="levantamiento-geodesico.html">Servicios REGNA-ROU</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="publicaciones-igm.html">Publicaciones</a></li>
+      <li><a href="#">Actualidad IGM</a>
+        <div class="dropdown">
+          <h5>Actualidad IGM</h5>
+          <ul>
+            <li><a href="noticias-actividades-igm2.html">Noticias</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="enlaces-igm.html">Enlaces</a></li>
+    </ul>
+  </nav>
+</header>
+
+<div class="hero">
+  <video autoplay muted loop playsinline poster="img/edificio-igm.png">
+    <source src="videos2/video-logoigm-2025.mp4" type="video/mp4">
+  </video>
+  <div class="hero-caption">
+    <span>Instituto Geográfico Militar</span>
+    <h1>Cartografía y Geografía oficial de Uruguay</h1>
+  </div>
+</div>
+
+<section id="modulos">
+  <h2 class="section-title">Módulos IGM</h2>
+  <p class="section-sub">Instituto Geográfico Militar</p>
+  <div class="modules-grid">
+    <div class="module-card">
+      <div class="thumb"><img src="img/modulos/geoportal_igm.svg" alt="Geoportal IGM"></div>
+      <div class="body">
+        <h3>Geoportal IGM</h3>
+        <p>Un portal geográfico con visores, geoservicios y cobertura nacional vectorial (WFS) del territorio uruguayo.</p>
+        <a href="geoportal-igm.html" class="btn-entrar">Entrar</a>
+      </div>
+    </div>
+    <div class="module-card">
+      <div class="thumb"><img class="icon" src="img/modulos/servicios_regna_rou.svg" alt="Servicios REGNA-ROU"></div>
+      <div class="body">
+        <h3>Servicios REGNA-ROU</h3>
+        <p>La Red Geodésica Nacional Activa (REGNA-ROU) ofrece mediciones de precisión mediante estaciones de referencia distribuidas en todo el país.</p>
+        <a href="levantamiento-geodesico.html" class="btn-entrar">Entrar</a>
+      </div>
+    </div>
+    <div class="module-card">
+      <div class="thumb"><img class="icon" src="img/modulos/sirgas_uruguay.svg" alt="SIRGAS"></div>
+      <div class="body">
+        <h3>SIRGAS Uruguay</h3>
+        <p>El Instituto Geográfico Militar, a través de la División Geodesia, se encarga de establecer la referencia geodésica oficial del país.</p>
+        <a href="https://www.sirgas.org" class="btn-entrar">Entrar</a>
+      </div>
+    </div>
+    <div class="module-card">
+      <div class="thumb"><img class="icon" src="img/modulos/productos_igm.svg" alt="Productos"></div>
+      <div class="body">
+        <h3>Productos IGM</h3>
+        <p>Cartografía oficial, mapas antiguos y publicaciones del Instituto Geográfico Militar del Uruguay disponibles para su adquisición.</p>
+        <a href="productos-igm.html" class="btn-entrar">Entrar</a>
+      </div>
+    </div>
+    <div class="module-card">
+      <div class="thumb"><img class="icon" src="img/modulos/visaciones.svg" alt="Visaciones"></div>
+      <div class="body">
+        <h3>Visaciones</h3>
+        <p>Trámite de visación de planos y documentos cartográficos ante el Instituto Geográfico Militar.</p>
+        <a href="visaciones-igm.html" class="btn-entrar">Entrar</a>
+      </div>
+    </div>
+    <div class="module-card">
+      <div class="thumb"><img class="icon" src="img/modulos/organizacion.svg" alt="Organización"></div>
+      <div class="body">
+        <h3>Organización</h3>
+        <p>La estructura administrativa del Instituto Geográfico Militar se encuentra conformada por la Dirección, Subdirección y las distintas Divisiones.</p>
+        <a href="organizacion-igm.html" class="btn-entrar">Entrar</a>
+      </div>
+    </div>
+    <div class="module-card">
+      <div class="thumb"><img class="icon" src="img/modulos/mapas_antiguos.svg" alt="Mapas Antiguos"></div>
+      <div class="body">
+        <h3>Mapas Antiguos</h3>
+        <p>Consulta el acervo histórico cartográfico del IGM, incluyendo mapas antiguos digitalizados de todo el territorio nacional.</p>
+        <a href="mapas-antiguos-igm.html" class="btn-entrar">Entrar</a>
+      </div>
+    </div>
+    <div class="module-card">
+      <div class="thumb"><img class="icon" src="img/modulos/capacitacion.svg" alt="Capacitación"></div>
+      <div class="body">
+        <h3>Capacitación</h3>
+        <p>Cursos y capacitaciones en geomática, geodesia y cartografía dictados por el Instituto Geográfico Militar.</p>
+        <a href="capacitacion-igm.html" class="btn-entrar">Entrar</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="actualidad"> <!-- Implementar -->
+  <h2 class="section-title">Actividades IGM</h2>
+  <p class="section-sub">Instituto Geográfico Militar</p>
+
+  <div class="destacada">
+    <img src="img/noticias/jornadas-ipgh-2026.jpg" alt="Jornadas de IPGH 2026">
+    <div>
+      <div class="fecha">Publicado: 17 de Julio 2026</div>
+      <h3>Jornadas de IPGH 2026</h3>
+      <a href="articulos-igm.html" class="btn-entrar">Ver noticia</a>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="font-size:1.2rem;">Actividades Recientes IGM</h2>
+  <p class="section-sub">Galería de actividades publicadas por nuestro Instituto</p>
+  <div class="noticias-scroll">
+    <div class="noticia-card"><img src="img/noticias/curso-geomatica-2026.jpg"><div class="info"><div class="fecha">12 de Mayo 2026</div><p>Curso Básico de Geomática: Inscripciones Abiertas</p></div></div>
+    <div class="noticia-card"><img src="img/noticias/lavalleja-2026.jpg"><div class="info"><div class="fecha">23 de Marzo 2026</div><p>Trabajos de Campo en el Departamento de Lavalleja</p></div></div>
+    <div class="noticia-card"><img src="img/noticias/receptores-gnss-regna-rou.jpg"><div class="info"><div class="fecha">16 de Diciembre 2025</div><p>Adquisición de nuevos Receptores GNSS para la REGNA-ROU</p></div></div>
+    <div class="noticia-card"><img src="img/noticias/relevamiento-pirajara.jpg"><div class="info"><div class="fecha">13 de Noviembre 2025</div><p>Relevamiento Geodésico - Topográfico en Pirarajá</p></div></div>
+    <div class="noticia-card"><img src="img/noticias/jornadas-ipgh-2025.jpg"><div class="info"><div class="fecha">18 de Setiembre 2025</div><p>Jornadas del IPGH 2025</p></div></div>
+    <div class="noticia-card"><img src="img/noticias/visita-nga.jpg"><div class="info"><div class="fecha">18 de Setiembre 2025</div><p>Visita delegación NGA</p></div></div>
+  </div>
+  <div class="ver-historial"><a href="noticias-actividades-igm2.html">Historial de noticias</a></div>
+</section>
+
+<section class="servicios">
+  <h2 class="section-title">Servicios IGM</h2>
+  <p class="section-sub">Instituto Geográfico Militar</p>
+  <div class="servicios-grid">
+    <div class="servicio-card">
+      <img src="img/servicios/regna-rou.png" alt="Servicios REGNA-ROU">
+      <h3 style="margin:0 0 8px;">Servicios REGNA-ROU</h3>
+      <p>La Red Geodésica Nacional Activa del Uruguay (REGNA-ROU) brinda mediciones de precisión mediante un servicio de posicionamiento en tiempo real, sin costo, previo registro.</p>
+      <a href="levantamiento-geodesico.html" class="ver-mas">Ver más »</a>
+    </div>
+    <div class="servicio-card">
+      <img src="img/servicios/geoportal.png" alt="Geoportal">
+      <h3 style="margin:0 0 8px;">Geoportal</h3>
+      <p>Un portal geográfico con visores interactivos, geoservicios WFS y cobertura vectorial nacional para consulta pública.</p>
+      <a href="geoportal-igm.html" class="ver-mas">Ver más »</a>
+    </div>
+    <div class="servicio-card">
+      <img src="img/servicios/capacitacion.png" alt="Capacitación">
+      <h3 style="margin:0 0 8px;">Capacitación</h3>
+      <p>Cursos de geomática, geodesia y cartografía dictados por especialistas del Instituto Geográfico Militar.</p>
+      <a href="capacitacion-igm.html" class="ver-mas">Ver más »</a>
+    </div>
+  </div>
+</section>
+
+<section id="links">
+  <h2 class="section-title">Enlaces de Interés IGM</h2>
+  <p class="section-sub">Instituto Geográfico Militar</p>
+  <div class="links-grid">
+    <div class="item"><img src="img/links/ejercito.jpg"><span>Ejército Nacional</span></div>
+    <div class="item"><img src="img/links/ipgh.jpg"><span>IPGH</span></div>
+    <div class="item"><img src="img/links/inumet.jpg"><span>INUMET</span></div>
+    <div class="item"><img src="img/links/sirgas.png"><span>SIRGAS</span></div>
+    <div class="item"><img src="img/links/ide.png"><span>IDE Uruguay</span></div>
+    <div class="item"><img src="img/links/gub.jpg"><span>gub.uy</span></div>
+  </div>
+</section>
+
+<section id="informaciones">
+  <h2 class="section-title">Informaciones IGM</h2>
+  <p class="section-sub">Instituto Geográfico Militar</p>
+  <table class="info-table">
+    <tr><th>Informaciones</th><th>Dirección / Fonos / Contactos</th></tr>
+    <tr><td>Dirección</td><td>Avenida 8 de Octubre 3255, Montevideo</td></tr>
+    <tr><td>Central</td><td>(+598) 2487 1810</td></tr>
+    <tr><td>Comercial</td><td>comercial@igm.gub.uy</td></tr>
+  </table>
+  <table class="info-table">
+    <tr><th colspan="2">Horario de Atención</th></tr>
+    <tr><td>Comercial</td><td>Lunes a viernes 8:00 a 13:00 hrs.</td></tr>
+    <tr><td>Mapoteca</td><td>Lunes a viernes 9:00 a 12:00 hrs.</td></tr>
+  </table>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h4>Institución</h4>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="mision-y-vision-igm.html">Misión y Visión</a></li>
+        <li><a href="autoridades.html">Autoridades</a></li>
+        <li><a href="historia-igm.html">Historia</a></li>
+        <li><a href="formulario-de-contacto.html">Contáctenos</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Servicios</h4>
+      <ul>
+        <li><a href="geoportal-igm.html">Geoportal</a></li>
+        <li><a href="visaciones-igm.html">Visaciones</a></li>
+        <li><a href="capacitacion-igm.html">Capacitación</a></li>
+        <li><a href="levantamiento-geodesico.html">Servicios REGNA-ROU</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Informaciones</h4>
+      <ul>
+        <li>Avenida 8 de Octubre 3255, Montevideo</li>
+        <li>Central: (+598) 2487 1810</li>
+        <li>comercial@igm.gub.uy</li>
+        <li>Horario Comercial: Lun. a Vie. 8:00 a 13:00 hrs.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Redes Sociales</h4>
+      <ul>
+        <li><a href="https://www.facebook.com/IGMUruguay/">Facebook</a></li>
+        <li><a href="https://twitter.com/igmuruguay">Twitter (X)</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Instituto Geográfico Militar del Uruguay - Todos los derechos reservados</span>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var STORAGE_KEY = "igmNoticiaModalCerrado";
+    var overlay = document.getElementById("igm-noticia-modal");
+    var closeBtn = document.getElementById("igm-modal-close");
+    if (!overlay) return;
+
+    function closeModal() {
+      overlay.classList.remove("is-open");
+      try { sessionStorage.setItem(STORAGE_KEY, "1"); } catch (e) { /* modo privado, etc. */ }
+    }
+
+    var yaCerrado = false;
+    try { yaCerrado = sessionStorage.getItem(STORAGE_KEY) === "1"; } catch (e) {}
+
+    if (!yaCerrado) {
+      window.addEventListener("load", function () {
+        setTimeout(function () { overlay.classList.add("is-open"); }, 400);
+      });
+    }
+
+    closeBtn.addEventListener("click", closeModal);
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay) closeModal();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeModal();
+    });
+  })();
+</script>
+
+</body>
+</html>

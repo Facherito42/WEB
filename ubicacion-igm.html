@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ubicación | Instituto Geográfico Militar del Uruguay</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header>
+  <div class="top-bar">
+    <a href="index.html" class="logo-wrap">
+      <img src="https://igm.gub.uy/wp-content/uploads/2017/05/logo.png" alt="Logo IGM">
+      <span class="logo-text">INSTITUTO GEOGRÁFICO<br>MILITAR DEL URUGUAY</span>
+    </a>
+  </div>
+  <nav class="main-nav">
+    <ul>
+      <li><a href="index.html">Inicio</a></li>
+      <li class="active"><a href="#">Institución</a>
+        <div class="dropdown">
+          <h5>Institución</h5>
+          <ul>
+            <li><a href="saludo-director-igm.html">Saludo del Director</a></li>
+            <li><a href="mision-y-vision-igm.html">Misión y Visión</a></li>
+            <li><a href="autoridades.html">Autoridades</a></li>
+            <li><a href="organizacion-igm.html">Organización</a></li>
+            <li><a href="ubicacion-igm.html">Ubicación</a></li>
+            <li><a href="historia-igm.html">Historia</a></li>
+            <li><a href="marco-juridico-igm.html">Marco Jurídico</a></li>
+            <li><a href="formulario-de-contacto.html">Contáctenos</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="#">Información Territorial</a>
+        <div class="dropdown">
+          <h5>Información Territorial</h5>
+          <ul>
+            <li><a href="limites-brasil-igm.html">Límites con Brasil</a></li>
+            <li><a href="limites-argentina-igm.html">Límites con Argentina</a></li>
+            <li><a href="puntos-extremos-igm.html">Puntos Extremos</a></li>
+            <li><a href="situacion-geografica-igm.html">Situación Geográfica</a></li>
+            <li><a href="division-politica-igm.html">División Política</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="productos-igm.html">Productos</a></li>
+      <li><a href="#">Servicios</a>
+        <div class="dropdown">
+          <h5>Servicios IGM</h5>
+          <ul>
+            <li><a href="geoportal-igm.html">Geoportal</a></li>
+            <li><a href="visaciones-igm.html">Visaciones</a></li>
+            <li><a href="capacitacion-igm.html">Capacitación</a></li>
+            <li><a href="mapas-antiguos-igm.html">Mapas Antiguos</a></li>
+            <li><a href="levantamiento-geodesico.html">Servicios REGNA-ROU</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="publicaciones-igm.html">Publicaciones</a></li>
+      <li><a href="#">Actualidad IGM</a>
+        <div class="dropdown">
+          <h5>Actualidad IGM</h5>
+          <ul>
+            <li><a href="noticias-actividades-igm2.html">Noticias</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="enlaces-igm.html">Enlaces</a></li>
+    </ul>
+  </nav>
+</header>
+
+<div class="page-banner">
+  <div class="inner">
+    <div class="eyebrow">Instituto Geográfico Militar</div>
+    <h1>Ubicación</h1>
+    <div class="breadcrumb"><a href="index.html">Inicio</a> / Institución / Ubicación</div>
+  </div>
+</div>
+
+<section class="content-page">
+  <h2>Sede del Instituto Geográfico Militar</h2>
+  <p>El Instituto Geográfico Militar del Uruguay se encuentra en el barrio Unión de Montevideo, sobre Avenida 8 de Octubre esquina Agustín Abreu.</p>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <div id="igm-map" style="width:100%; height:420px; border:1px solid #ddd; border-radius:6px; margin:20px 0;"></div>
+  <p style="font-size:0.85rem; color:#666;">Ubicación aproximada sobre Av. 8 de Octubre y Agustín Abreu, barrio Unión.</p>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    var igmLat = -34.8595, igmLng = -56.1548;
+    var igmMap = L.map('igm-map').setView([igmLat, igmLng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(igmMap);
+    L.marker([igmLat, igmLng]).addTo(igmMap)
+      .bindPopup('<strong>Instituto Geográfico Militar</strong><br>Av. 8 de Octubre 3255, Montevideo')
+      .openPopup();
+  </script>
+
+  <div class="row" style="margin-top:30px; display:flex; gap:24px; flex-wrap:wrap;">
+    <div style="flex:1; min-width:260px;">
+      <h3 style="margin-top:0;">Cómo llegar</h3>
+      <p>Ómnibus con parada en Av. 8 de Octubre y Agustín Abreu: líneas 2, 105, 145, 174, 181 y 300, entre otras.</p>
+    </div>
+    <div style="flex:1; min-width:260px;">
+      <h3 style="margin-top:0;">Horarios de atención</h3>
+      <table class="info-table" style="width:100%;">
+        <tr><td>Oficina comercial</td><td>Lunes a viernes, 8:00 a 13:00 hs.</td></tr>
+        <tr><td>Mapoteca</td><td>Lunes a viernes, 9:00 a 12:00 hs.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <a href="https://www.google.com/maps/search/?api=1&query=Avenida+8+de+Octubre+3255,+Montevideo" target="_blank" rel="noopener" class="btn-outline" style="margin-top:20px;display:inline-block;">Abrir en Google Maps</a>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h4>Institución</h4>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="mision-y-vision-igm.html">Misión y Visión</a></li>
+        <li><a href="autoridades.html">Autoridades</a></li>
+        <li><a href="historia-igm.html">Historia</a></li>
+        <li><a href="formulario-de-contacto.html">Contáctenos</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Servicios</h4>
+      <ul>
+        <li><a href="geoportal-igm.html">Geoportal</a></li>
+        <li><a href="visaciones-igm.html">Visaciones</a></li>
+        <li><a href="capacitacion-igm.html">Capacitación</a></li>
+        <li><a href="levantamiento-geodesico.html">Servicios REGNA-ROU</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Informaciones</h4>
+      <ul>
+        <li>Avenida 8 de Octubre 3255, Montevideo</li>
+        <li>Central: (+598) 2487 1810</li>
+        <li>comercial@igm.gub.uy</li>
+        <li>Horario Comercial: Lun. a Vie. 8:00 a 13:00 hrs.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Redes Sociales</h4>
+      <ul>
+        <li><a href="https://www.facebook.com/IGMUruguay/">Facebook</a></li>
+        <li><a href="https://twitter.com/igmuruguay">Twitter (X)</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Instituto Geográfico Militar del Uruguay - Todos los derechos reservados</span>
+  </div>
+</footer>
+</body>
+</html>

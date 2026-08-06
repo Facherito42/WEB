@@ -1,0 +1,29 @@
+<svg width="480" height="260" viewBox="0 0 480 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5FC2E8"/>
+      <stop offset="100%" stop-color="#1C6FA8"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="260" fill="#ECECEC"/>
+  <circle cx="240" cy="165" r="60" fill="url(#g3)" stroke="#134766" stroke-width="1.5"/>
+  <g stroke="#EAF6FF" stroke-width="1" fill="none" opacity="0.6">
+    <ellipse cx="240" cy="165" rx="60" ry="22"/>
+    <ellipse cx="240" cy="165" rx="22" ry="60"/>
+    <line x1="180" y1="165" x2="300" y2="165"/>
+  </g>
+  <g stroke="#B8860B" stroke-width="1.3" stroke-dasharray="4 3" fill="none">
+    <line x1="240" y1="75" x2="205" y2="130"/>
+    <line x1="240" y1="75" x2="275" y2="130"/>
+    <line x1="240" y1="75" x2="240" y2="150"/>
+  </g>
+  <g transform="translate(240,60)">
+    <path d="M0 -20 L14 6 L-14 6 Z" fill="#F5B400" stroke="#B8860B" stroke-width="1.2"/>
+    <rect x="-5" y="6" width="10" height="10" fill="#F5B400" stroke="#B8860B" stroke-width="1"/>
+    <line x1="-14" y1="-2" x2="-24" y2="-2" stroke="#B8860B" stroke-width="1.5"/>
+    <line x1="14" y1="-2" x2="24" y2="-2" stroke="#B8860B" stroke-width="1.5"/>
+  </g>
+  <circle cx="205" cy="130" r="5" fill="#F5B400" stroke="#B8860B" stroke-width="1"/>
+  <circle cx="275" cy="130" r="5" fill="#F5B400" stroke="#B8860B" stroke-width="1"/>
+  <circle cx="240" cy="150" r="5" fill="#F5B400" stroke="#B8860B" stroke-width="1"/>
+</svg>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Descarga de Archivos RINEX | Instituto Geográfico Militar del Uruguay</title>
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .rinex-wrap { max-width: 1000px; margin: 0 auto; }
+  .rinex-filters {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    background: #f4f6f8; border: 1px solid #e0e4e8; border-radius: 8px;
+    padding: 20px; margin: 24px 0;
+  }
+  .rinex-filters .field { display: flex; flex-direction: column; min-width: 140px; }
+  .rinex-filters label { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #333; }
+  .rinex-filters select {
+    padding: 8px 10px; border: 1px solid #c7ccd1; border-radius: 6px; font-size: 0.95rem;
+    background: #fff;
+  }
+  .rinex-breadcrumb { font-size: 0.9rem; color: #555; margin-bottom: 10px; }
+  .rinex-breadcrumb span { font-weight: 600; color: #14406b; }
+  table.rinex-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  table.rinex-table th, table.rinex-table td {
+    text-align: left; padding: 10px 12px; border-bottom: 1px solid #e5e5e5; font-size: 0.92rem;
+  }
+  table.rinex-table th { background: #14406b; color: #fff; }
+  table.rinex-table tr:hover { background: #f1f6fb; }
+  .btn-download {
+    display: inline-block; padding: 6px 14px; border-radius: 5px;
+    background: #14406b; color: #fff; text-decoration: none; font-size: 0.85rem;
+  }
+  .btn-download:hover { background: #0d2c4a; }
+  .rinex-empty { padding: 30px; text-align: center; color: #777; font-style: italic; }
+  .rinex-note {
+    background: #fff8e6; border: 1px solid #f0d998; border-radius: 6px;
+    padding: 14px 16px; font-size: 0.88rem; color: #6b5a20; margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="top-bar">
+    <a href="index.html" class="logo-wrap">
+      <img src="https://igm.gub.uy/wp-content/uploads/2017/05/logo.png" alt="Logo IGM">
+      <span class="logo-text">INSTITUTO GEOGRÁFICO<br>MILITAR DEL URUGUAY</span>
+    </a>
+  </div>
+  <nav class="main-nav">
+    <ul>
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="#">Institución</a>
+        <div class="dropdown">
+          <h5>Institución</h5>
+          <ul>
+            <li><a href="saludo-director-igm.html">Saludo del Director</a></li>
+            <li><a href="mision-y-vision-igm.html">Misión y Visión</a></li>
+            <li><a href="autoridades.html">Autoridades</a></li>
+            <li><a href="organizacion-igm.html">Organización</a></li>
+            <li><a href="historia-igm.html">Historia</a></li>
+            <li><a href="marco-juridico-igm.html">Marco Jurídico</a></li>
+            <li><a href="formulario-de-contacto.html">Contáctenos</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="#">Información Territorial</a>
+        <div class="dropdown">
+          <h5>Información Territorial</h5>
+          <ul>
+            <li><a href="limites-brasil-igm.html">Límites con Brasil</a></li>
+            <li><a href="limites-argentina-igm.html">Límites con Argentina</a></li>
+            <li><a href="puntos-extremos-igm.html">Puntos Extremos</a></li>
+            <li><a href="situacion-geografica-igm.html">Situación Geográfica</a></li>
+            <li><a href="division-politica-igm.html">División Política</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="productos-igm.html">Productos</a></li>
+      <li class="active"><a href="#">Servicios</a>
+        <div class="dropdown">
+          <h5>Servicios IGM</h5>
+          <ul>
+            <li><a href="geoportal-igm.html">Geoportal</a></li>
+            <li><a href="visaciones-igm.html">Visaciones</a></li>
+            <li><a href="capacitacion-igm.html">Capacitación</a></li>
+            <li><a href="mapas-antiguos-igm.html">Mapas Antiguos</a></li>
+            <li><a href="levantamiento-geodesico.html">Servicios REGNA-ROU</a></li>
+            <li><a href="descarga-rinex.html">Descarga de archivos RINEX</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="publicaciones-igm.html">Publicaciones</a></li>
+      <li><a href="#">Actualidad IGM</a>
+        <div class="dropdown">
+          <h5>Actualidad IGM</h5>
+          <ul>
+            <li><a href="noticias-actividades-igm2.html">Noticias</a></li>
+          </ul>
+        </div>
+      </li>
+      <li><a href="enlaces-igm.html">Enlaces</a></li>
+    </ul>
+  </nav>
+</header>
+
+<div class="page-banner">
+  <div class="inner">
+    <div class="eyebrow">Instituto Geográfico Militar</div>
+    <h1>Descarga de Archivos RINEX</h1>
+    <div class="breadcrumb"><a href="index.html">Inicio</a> / Servicios / Descarga de archivos RINEX</div>
+  </div>
+</div>
+
+<section class="content-page">
+  <div class="rinex-wrap">
+    <p>Descargá los archivos RINEX de las estaciones de la red REGNA-ROU, organizados por <strong>año, mes, día y estación</strong>. Seleccioná los filtros para ubicar el archivo que necesitás.</p>
+
+    <div class="rinex-filters">
+      <div class="field">
+        <label for="f-year">Año</label>
+        <select id="f-year"><option value="">Todos</option></select>
+      </div>
+      <div class="field">
+        <label for="f-month">Mes</label>
+        <select id="f-month"><option value="">Todos</option></select>
+      </div>
+      <div class="field">
+        <label for="f-day">Día</label>
+        <select id="f-day"><option value="">Todos</option></select>
+      </div>
+      <div class="field">
+        <label for="f-station">Estación</label>
+        <select id="f-station"><option value="">Todas</option></select>
+      </div>
+    </div>
+
+    <div class="rinex-breadcrumb">
+      Mostrando: <span id="rinex-path">todos los archivos</span>
+      · <span id="rinex-count">0 archivos</span>
+    </div>
+
+    <div id="rinex-results"></div>
+
+    <div class="rinex-note" id="rinex-status-note" style="display:none;">
+      <strong>Aviso:</strong> <span id="rinex-status-text"></span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h4>Institución</h4>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="mision-y-vision-igm.html">Misión y Visión</a></li>
+        <li><a href="autoridades.html">Autoridades</a></li>
+        <li><a href="organizacion-igm.html">Organización</a></li>
+        <li><a href="formulario-de-contacto.html">Contáctenos</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Servicios</h4>
+      <ul>
+        <li><a href="geoportal-igm.html">Geoportal</a></li>
+        <li><a href="visaciones-igm.html">Visaciones</a></li>
+        <li><a href="capacitacion-igm.html">Capacitación</a></li>
+        <li><a href="levantamiento-geodesico.html">Servicios REGNA-ROU</a></li>
+        <li><a href="descarga-rinex.html">Descarga de archivos RINEX</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Informaciones</h4>
+      <ul>
+        <li>Avenida 8 de Octubre 3255, Montevideo</li>
+        <li>Central: (+598) 2487 1810</li>
+        <li>comercial@igm.gub.uy</li>
+        <li>Horario Comercial: Lun. a Vie. 8:00 a 13:00 hrs.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Redes Sociales</h4>
+      <ul>
+        <li><a href="https://www.facebook.com/IGMUruguay/">Facebook</a></li>
+        <li><a href="https://twitter.com/igmuruguay">Twitter (X)</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Instituto Geográfico Militar del Uruguay - Todos los derechos reservados</span>
+  </div>
+</footer>
+
+<script>
+  // ------------------------------------------------------------------
+  // Los archivos se cargan desde el manifest generado por
+  // sync-rinex.sh + build_manifest.py (ver carpeta rinex-solucion).
+  // Ajustar estas dos rutas a donde el servidor web las publique.
+  // ------------------------------------------------------------------
+  const MANIFEST_URL = "/rinex-data/rinex.json";
+  const DOWNLOAD_BASE = "/rinex-data/raw";
+
+  let rinexFiles = [];
+
+  const monthNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+  const elYear = document.getElementById("f-year");
+  const elMonth = document.getElementById("f-month");
+  const elDay = document.getElementById("f-day");
+  const elStation = document.getElementById("f-station");
+  const elResults = document.getElementById("rinex-results");
+  const elPath = document.getElementById("rinex-path");
+  const elCount = document.getElementById("rinex-count");
+
+  function uniqueSorted(arr) {
+    return [...new Set(arr)].sort((a, b) => a - b);
+  }
+
+  function populateSelect(select, values, formatter) {
+    select.querySelectorAll("option:not(:first-child)").forEach(o => o.remove());
+    values.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = formatter ? formatter(v) : v;
+      select.appendChild(opt);
+    });
+  }
+
+  function currentFilters() {
+    return {
+      year: elYear.value ? parseInt(elYear.value) : null,
+      month: elMonth.value ? parseInt(elMonth.value) : null,
+      day: elDay.value ? parseInt(elDay.value) : null,
+      station: elStation.value || null,
+    };
+  }
+
+  function matches(file, f) {
+    return (!f.year || file.year === f.year)
+        && (!f.month || file.month === f.month)
+        && (!f.day || file.day === f.day)
+        && (!f.station || file.station === f.station);
+  }
+
+  function refreshFilterOptions() {
+    const f = currentFilters();
+
+    const years = uniqueSorted(rinexFiles.filter(x => matches(x, {...f, year:null})).map(x => x.year)).reverse();
+    populateSelect(elYear, years);
+    if (f.year) elYear.value = f.year;
+
+    const months = uniqueSorted(rinexFiles.filter(x => matches(x, {...f, month:null})).map(x => x.month));
+    populateSelect(elMonth, months, m => monthNames[m-1]);
+    if (f.month) elMonth.value = f.month;
+
+    const days = uniqueSorted(rinexFiles.filter(x => matches(x, {...f, day:null})).map(x => x.day));
+    populateSelect(elDay, days, d => String(d).padStart(2,"0"));
+    if (f.day) elDay.value = f.day;
+
+    const stations = [...new Set(rinexFiles.filter(x => matches(x, {...f, station:null})).map(x => x.station))].sort();
+    populateSelect(elStation, stations);
+    if (f.station) elStation.value = f.station;
+  }
+
+  function render() {
+    const f = currentFilters();
+    const matched = rinexFiles.filter(x => matches(x, f));
+
+    const pathParts = [];
+    if (f.year) pathParts.push(f.year);
+    if (f.month) pathParts.push(monthNames[f.month-1]);
+    if (f.day) pathParts.push(String(f.day).padStart(2,"0"));
+    if (f.station) pathParts.push(f.station);
+    elPath.textContent = pathParts.length ? pathParts.join(" / ") : "todos los archivos";
+    elCount.textContent = matched.length + (matched.length === 1 ? " archivo" : " archivos");
+
+    if (matched.length === 0) {
+      elResults.innerHTML = '<div class="rinex-empty">No hay archivos que coincidan con ese filtro.</div>';
+      return;
+    }
+
+    matched.sort((a,b) => b.year-a.year || b.month-a.month || b.day-a.day || a.station.localeCompare(b.station));
+
+    let html = '<table class="rinex-table"><thead><tr>'
+      + '<th>Fecha</th><th>Estación</th><th>Archivo</th><th>Tamaño</th><th></th>'
+      + '</tr></thead><tbody>';
+
+    matched.forEach(x => {
+      const dateStr = String(x.day).padStart(2,"0") + "/" + String(x.month).padStart(2,"0") + "/" + x.year;
+      const url = `${DOWNLOAD_BASE}/${x.path}`;
+      html += `<tr>
+        <td>${dateStr}</td>
+        <td>${x.station}</td>
+        <td>${x.filename}</td>
+        <td>${x.size}</td>
+        <td><a class="btn-download" href="${url}" download>Descargar</a></td>
+      </tr>`;
+    });
+
+    html += "</tbody></table>";
+    elResults.innerHTML = html;
+  }
+
+  function onFilterChange() {
+    refreshFilterOptions();
+    render();
+  }
+
+  [elYear, elMonth, elDay, elStation].forEach(el => el.addEventListener("change", onFilterChange));
+
+  function showNote(msg) {
+    const note = document.getElementById("rinex-status-note");
+    document.getElementById("rinex-status-text").textContent = msg;
+    note.style.display = "block";
+  }
+
+  async function loadManifest() {
+    elResults.innerHTML = '<div class="rinex-empty">Cargando archivos…</div>';
+    try {
+      const resp = await fetch(MANIFEST_URL, { cache: "no-store" });
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      rinexFiles = await resp.json();
+      if (!Array.isArray(rinexFiles) || rinexFiles.length === 0) {
+        showNote("No se encontraron archivos en este momento. Puede que el último sincronismo con el servidor RINEX no haya generado datos todavía.");
+      }
+    } catch (err) {
+      rinexFiles = [];
+      showNote("No se pudo cargar el listado de archivos (" + err.message + "). Intentá nuevamente en unos minutos o contactá al equipo técnico.");
+    }
+    refreshFilterOptions();
+    render();
+  }
+
+  loadManifest();
+</script>
+
+</body>
+</html>
