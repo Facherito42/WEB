@@ -52,7 +52,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity .3s ease;
-  z-index: 900;
+  z-index: 9000; /* por debajo del header forzado (9999) en mobile */
 }
 .igm-overlay.igm-show{
   opacity: 1;
@@ -63,6 +63,14 @@
 @media (max-width: 900px){
 
   .igm-burger{ display: flex; }
+
+  /* Fuerza que el <header> completo (y el panel, que vive adentro)
+     quede siempre por encima del overlay, incluso si el sitio ya
+     le da su propio position/z-index (headers "sticky", etc.) */
+  header{
+    position: relative !important;
+    z-index: 9999 !important;
+  }
 
   header .main-nav{
     position: fixed;
@@ -78,9 +86,13 @@
     z-index: 950;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    pointer-events: auto !important;
   }
   header .main-nav.igm-open-nav{
     transform: translateX(0);
+  }
+  header .main-nav a{
+    pointer-events: auto !important;
   }
 
   .igm-panel-header{
@@ -152,8 +164,11 @@
 
   /* submenú tipo acordeón */
   header .main-nav .dropdown{
-    position: static;
-    display: block;
+    position: static !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
     max-height: 0;
     overflow: hidden;
     background: #f7f8f6;
@@ -163,6 +178,9 @@
   }
   header .main-nav > ul > li.igm-open .dropdown{
     max-height: 600px;
+  }
+  header .main-nav .dropdown a{
+    pointer-events: auto !important;
   }
   header .main-nav .dropdown h5{
     display: none; /* ya está el título en el link padre */
