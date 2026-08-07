@@ -13,6 +13,14 @@
   position: relative; /* ancla el botón hamburguesa */
 }
 
+/* Evita que los mapas de Leaflet (ubicación, estaciones REGNA-ROU) se
+   superpongan al header al hacer scroll. Leaflet usa z-index internos
+   de hasta ~1000 (controles y popups); esto corre en cualquier ancho
+   de pantalla, no sólo en mobile. */
+header{
+  z-index: 5000 !important;
+}
+
 /* ---------- Botón hamburguesa (insertado por mobile-menu.js) ---------- */
 .igm-burger{
   display: none;
