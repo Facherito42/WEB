@@ -1,0 +1,188 @@
+/* =========================================================
+   Menú hamburguesa para móviles — Instituto Geográfico Militar
+   Se integra con la estructura existente: header > .top-bar
+   y header > nav.main-nav > ul > li > a (+ .dropdown opcional)
+   No modifica el diseño de escritorio.
+   ========================================================= */
+
+:root{
+  --igm-burger-breakpoint: 900px;
+}
+
+.top-bar{
+  position: relative; /* ancla el botón hamburguesa */
+}
+
+/* ---------- Botón hamburguesa (insertado por mobile-menu.js) ---------- */
+.igm-burger{
+  display: none;
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 1001;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0;
+}
+.igm-burger span{
+  display: block;
+  width: 26px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--verde-igm-osc, #1F3D2B);
+  transition: transform .3s ease, opacity .3s ease, background .3s ease;
+}
+.igm-burger.igm-open span:nth-child(1){ transform: translateY(9px) rotate(45deg); }
+.igm-burger.igm-open span:nth-child(2){ opacity: 0; }
+.igm-burger.igm-open span:nth-child(3){ transform: translateY(-9px) rotate(-45deg); }
+
+/* ---------- Overlay ---------- */
+.igm-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 15, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease;
+  z-index: 900;
+}
+.igm-overlay.igm-show{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------- Panel del menú (sólo se activa bajo el breakpoint) ---------- */
+@media (max-width: 900px){
+
+  .igm-burger{ display: flex; }
+
+  header .main-nav{
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 84%;
+    max-width: 340px;
+    background: #fff;
+    box-shadow: -6px 0 24px rgba(0,0,0,0.18);
+    transform: translateX(100%);
+    transition: transform .35s cubic-bezier(.4,0,.2,1);
+    z-index: 950;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  header .main-nav.igm-open-nav{
+    transform: translateX(0);
+  }
+
+  .igm-panel-header{
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    background: var(--verde-igm-osc, #1F3D2B);
+    border-bottom: 3px solid var(--dorado, #C9A227);
+    z-index: 2;
+  }
+  .igm-panel-header span{
+    color: var(--dorado, #C9A227);
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 14px;
+  }
+  .igm-close{
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 6px;
+  }
+
+  header .main-nav > ul{
+    display: block;
+    padding: 0;
+    margin: 0;
+  }
+  header .main-nav > ul > li{
+    display: block;
+    border-bottom: 1px solid #ececec;
+  }
+  header .main-nav > ul > li > a{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    color: #1c1c1c;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+  }
+  header .main-nav > ul > li.active > a,
+  header .main-nav > ul > li > a:hover{
+    color: var(--verde-igm-osc, #1F3D2B);
+  }
+
+  /* flecha indicadora en items con submenú */
+  header .main-nav > ul > li.has-dropdown > a::after{
+    content: "";
+    width: 9px;
+    height: 9px;
+    border-right: 2px solid #8a8a8a;
+    border-bottom: 2px solid #8a8a8a;
+    transform: rotate(45deg);
+    transition: transform .25s ease;
+    flex-shrink: 0;
+    margin-left: 10px;
+  }
+  header .main-nav > ul > li.has-dropdown.igm-open > a::after{
+    transform: rotate(-135deg);
+  }
+
+  /* submenú tipo acordeón */
+  header .main-nav .dropdown{
+    position: static;
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    background: #f7f8f6;
+    box-shadow: none;
+    padding: 0;
+    transition: max-height .3s ease;
+  }
+  header .main-nav > ul > li.igm-open .dropdown{
+    max-height: 600px;
+  }
+  header .main-nav .dropdown h5{
+    display: none; /* ya está el título en el link padre */
+  }
+  header .main-nav .dropdown ul{
+    padding: 4px 0 8px;
+  }
+  header .main-nav .dropdown ul li a{
+    display: block;
+    padding: 10px 18px 10px 34px;
+    font-size: 13.5px;
+    color: #444;
+    text-decoration: none;
+    border-bottom: none;
+  }
+  header .main-nav .dropdown ul li a:hover{
+    color: var(--verde-igm-osc, #1F3D2B);
+  }
+
+  body.igm-menu-locked{
+    overflow: hidden;
+  }
+}
