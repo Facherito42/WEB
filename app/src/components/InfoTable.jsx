@@ -1,20 +1,16 @@
-export default function InfoTable({ caption, rows }) {
+export default function InfoTable({ headers, rows, style }) {
   return (
-    <table className="w-full border-collapse mb-7.5 text-[0.85rem]">
-      {caption && (
-        <thead>
-          <tr>
-            <th colSpan={2} className="border border-[#ddd] p-2.5 text-left align-top bg-verde-igm text-white">
-              {caption}
-            </th>
-          </tr>
-        </thead>
-      )}
+    <table className="info-table" style={style}>
       <tbody>
+        {headers && (
+          <tr>
+            {headers.length === 1 ? <th colSpan={2}>{headers[0]}</th> : headers.map((h) => <th key={h}>{h}</th>)}
+          </tr>
+        )}
         {rows.map(([label, value]) => (
           <tr key={label}>
-            <td className="border border-[#ddd] p-2.5 text-left align-top">{label}</td>
-            <td className="border border-[#ddd] p-2.5 text-left align-top">{value}</td>
+            <td>{label}</td>
+            <td>{value}</td>
           </tr>
         ))}
       </tbody>

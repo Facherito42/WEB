@@ -2,12 +2,45 @@ import { Outlet } from 'react-router-dom'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import PageStub from './pages/PageStub'
+import Historia from './pages/Historia'
+import MisionYVision from './pages/MisionYVision'
+import SaludoDirector from './pages/SaludoDirector'
+import MarcoJuridico from './pages/MarcoJuridico'
+import Capacitacion from './pages/Capacitacion'
+import MapasAntiguos from './pages/MapasAntiguos'
+import Productos from './pages/Productos'
+import Visaciones from './pages/Visaciones'
+import Autoridades from './pages/Autoridades'
+import Organizacion from './pages/Organizacion'
+import NoticiasActividades from './pages/NoticiasActividades'
+import FormularioContacto from './pages/FormularioContacto'
+import Ubicacion from './pages/Ubicacion'
+import LevantamientoGeodesico from './pages/LevantamientoGeodesico'
+import DescargaRinex from './pages/DescargaRinex'
 import { nav } from './data/nav'
 
-// Generate a placeholder route for every real (non-dropdown-trigger) nav
-// destination that hasn't been ported yet, so Phase A nav is fully
-// clickable/keyboard-testable without 404s. Replaced page-by-page in
-// later phases.
+// Real pages ported from the static site. Paths without a `.jsx` above
+// (limites-brasil-igm, publicaciones-igm, geoportal-igm, enlaces-igm, etc.)
+// didn't exist as files in the original static site either — they're
+// dead links there too, so they fall back to the "not migrated" stub.
+const realPages = {
+  '/historia-igm': <Historia />,
+  '/mision-y-vision-igm': <MisionYVision />,
+  '/saludo-director-igm': <SaludoDirector />,
+  '/marco-juridico-igm': <MarcoJuridico />,
+  '/capacitacion-igm': <Capacitacion />,
+  '/mapas-antiguos-igm': <MapasAntiguos />,
+  '/productos-igm': <Productos />,
+  '/visaciones-igm': <Visaciones />,
+  '/autoridades': <Autoridades />,
+  '/organizacion-igm': <Organizacion />,
+  '/noticias-actividades-igm2': <NoticiasActividades />,
+  '/formulario-de-contacto': <FormularioContacto />,
+  '/ubicacion-igm': <Ubicacion />,
+  '/levantamiento-geodesico': <LevantamientoGeodesico />,
+  '/descarga-rinex': <DescargaRinex />,
+}
+
 function leafDestinations(items) {
   const flat = []
   for (const item of items) {
@@ -23,9 +56,9 @@ function leafDestinations(items) {
   return flat
 }
 
-const stubRoutes = leafDestinations(nav).map(({ path, label }) => ({
+const dynamicRoutes = leafDestinations(nav).map(({ path, label }) => ({
   path: path.replace(/^\//, ''),
-  element: <PageStub title={label} />,
+  element: realPages[path] ?? <PageStub title={label} />,
 }))
 
 export const routes = [
@@ -36,6 +69,13 @@ export const routes = [
         <Outlet />
       </Layout>
     ),
-    children: [{ index: true, element: <Home /> }, ...stubRoutes],
+    children: [
+      { index: true, element: <Home /> },
+      ...dynamicRoutes,
+      // Referenced by news cards/modal; no article content existed in the
+      // original static site either (articulos-igm.html was never a real
+      // file — same dead link there).
+      { path: 'articulos-igm', element: <PageStub title="Actualidad IGM" /> },
+    ],
   },
 ]
