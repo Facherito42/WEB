@@ -201,9 +201,9 @@ h2.section-title{
 .links-grid{
   display:grid; grid-template-columns:repeat(auto-fit, minmax(120px,1fr)); gap:18px; text-align:center;
 }
-.links-grid .item{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+.links-grid .item, #links .item{ display:flex; flex-direction:column; align-items:center; gap:8px; flex-shrink:0; text-align:center; }
 .links-grid img{ height:60px; object-fit:contain; }
-.links-grid .item span{ font-size:.78rem; font-weight:600; color:var(--verde-igm-osc); }
+.links-grid .item span, #links .item span{ font-size:.78rem; font-weight:600; color:var(--verde-igm-osc); }
 
 /* Tables */
 table.info-table{ width:100%; border-collapse:collapse; margin-bottom:30px; font-size:.85rem; }

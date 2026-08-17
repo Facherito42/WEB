@@ -14,11 +14,13 @@
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-navigation-menu": "^1.2.22",
     "clsx": "^2.1.1",
+    "framer-motion": "^13.1.0",
     "leaflet": "^1.9.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-leaflet": "^5.0.0",
-    "react-router-dom": "^6.30.4"
+    "react-router-dom": "^6.30.4",
+    "react-use-measure": "^2.1.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",

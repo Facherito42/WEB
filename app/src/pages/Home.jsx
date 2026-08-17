@@ -4,6 +4,7 @@ import ModuleCard from '../components/ModuleCard'
 import CircularGallery from '../components/CircularGallery'
 import ServicioCard from '../components/ServicioCard'
 import InfoTable from '../components/InfoTable'
+import { InfiniteSlider } from '../components/InfiniteSlider'
 
 const modules = [
   {
@@ -159,14 +160,14 @@ export default function Home() {
       <section id="links">
         <h2 className="section-title">Enlaces de Interés IGM</h2>
         <p className="section-sub">Instituto Geográfico Militar</p>
-        <div className="links-grid">
+        <InfiniteSlider gap={40} duration={30} durationOnHover={75}>
           {links.map((l) => (
-            <div className="item" key={l.label}>
-              <img src={l.image} alt="" />
+            <div className="item" key={l.label} style={{ width: 120 }}>
+              <img src={l.image} alt="" style={{ height: 60, width: '100%', objectFit: 'contain' }} />
               <span>{l.label}</span>
             </div>
           ))}
-        </div>
+        </InfiniteSlider>
       </section>
 
       <section id="informaciones">
