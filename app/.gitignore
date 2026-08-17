@@ -1,0 +1,8 @@
+node_modules
+dist
+.DS_Store
+*.local
+
+# Duplicated from the repo-root img/ (already tracked there) so Vite can
+# serve it from public/ — not tracked here to avoid a second copy in git.
+public/img
