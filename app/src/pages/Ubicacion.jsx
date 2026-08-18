@@ -16,7 +16,7 @@ export default function Ubicacion() {
         <h2>Sede del Instituto Geográfico Militar</h2>
         <p>El Instituto Geográfico Militar del Uruguay se encuentra en el barrio Unión de Montevideo, sobre Avenida 8 de Octubre esquina Agustín Abreu.</p>
 
-        <div style={{ width: '100%', height: 420, border: '1px solid #ddd', borderRadius: 6, margin: '20px 0' }}>
+        <div style={{ width: '100%', height: 420, border: '1px solid #ddd', borderRadius: 6, margin: '20px 0', position: 'relative', isolation: 'isolate' }}>
           <ClientOnly fallback={mapFallback}>
             <Suspense fallback={mapFallback}>
               <UbicacionMap />

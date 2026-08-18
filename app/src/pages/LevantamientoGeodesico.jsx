@@ -42,7 +42,7 @@ export default function LevantamientoGeodesico() {
           muestra las estaciones de la red uruguaya que forman parte de SIRGAS-CON, identificadas por su código de estación y localidad:
         </p>
 
-        <div style={{ width: '100%', height: 480, border: '1px solid #ddd', borderRadius: 6, margin: '20px 0' }}>
+        <div style={{ width: '100%', height: 480, border: '1px solid #ddd', borderRadius: 6, margin: '20px 0', position: 'relative', isolation: 'isolate' }}>
           <ClientOnly fallback={mapFallback}>
             <Suspense fallback={mapFallback}>
               <RegnaMap />

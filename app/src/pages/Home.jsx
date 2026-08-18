@@ -5,6 +5,7 @@ import CircularGallery from '../components/CircularGallery'
 import ServicioCard from '../components/ServicioCard'
 import InfoTable from '../components/InfoTable'
 import { InfiniteSlider } from '../components/InfiniteSlider'
+import StatsSection from '../components/StatsSection'
 
 const modules = [
   {
@@ -69,19 +70,19 @@ const noticias = [
 
 const servicios = [
   {
-    icon: '/img/servicios/regna-rou.png',
+    icon: '/img/modulos/servicios_regna_rou.svg',
     title: 'Servicios REGNA-ROU',
     description: 'La Red Geodésica Nacional Activa del Uruguay (REGNA-ROU) brinda mediciones de precisión mediante un servicio de posicionamiento en tiempo real, sin costo, previo registro.',
     to: '/levantamiento-geodesico',
   },
   {
-    icon: '/img/servicios/geoportal.png',
+    icon: '/img/modulos/geoportal_igm.svg',
     title: 'Geoportal',
     description: 'Un portal geográfico con visores interactivos, geoservicios WFS y cobertura vectorial nacional para consulta pública.',
     to: '/geoportal-igm',
   },
   {
-    icon: '/img/servicios/capacitacion.png',
+    icon: '/img/modulos/capacitacion.svg',
     title: 'Capacitación',
     description: 'Cursos de geomática, geodesia y cartografía dictados por especialistas del Instituto Geográfico Militar.',
     to: '/capacitacion-igm',
@@ -103,8 +104,8 @@ export default function Home() {
       <NewsModal />
 
       <div className="hero">
-        <video autoPlay muted loop playsInline poster="/img/edificio-igm.png">
-          <source src="/videos2/video-logoigm-2025.mp4" type="video/mp4" />
+        <video autoPlay muted loop playsInline>
+          <source src="/videos/Hailuo_Video_Keep the original video exactl_545775233654001671.mp4" type="video/mp4" />
         </video>
         <div className="hero-caption">
           <span>Instituto Geográfico Militar</span>
@@ -121,6 +122,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <StatsSection />
 
       <section id="actualidad">
         <h2 className="section-title">Actividades IGM</h2>
@@ -157,6 +160,7 @@ export default function Home() {
         </div>
       </section>
 
+
       <section id="links">
         <h2 className="section-title">Enlaces de Interés IGM</h2>
         <p className="section-sub">Instituto Geográfico Militar</p>
@@ -171,10 +175,10 @@ export default function Home() {
       </section>
 
       <section id="informaciones">
-        <h2 className="section-title">Informaciones IGM</h2>
+        <h2 className="section-title">Información IGM</h2>
         <p className="section-sub">Instituto Geográfico Militar</p>
         <InfoTable
-          headers={['Informaciones', 'Dirección / Fonos / Contactos']}
+          headers={['Informaciones', 'Dirección / Teléfono / Contactos']}
           rows={[
             ['Dirección', 'Avenida 8 de Octubre 3255, Montevideo'],
             ['Central', '(+598) 2487 1810'],

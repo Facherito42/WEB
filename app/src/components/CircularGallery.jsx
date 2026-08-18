@@ -6,7 +6,7 @@ import clsx from 'clsx'
 // Auto-rotates continuously (no scroll-jacking — this sits inside a normal
 // page section, not a dedicated full-viewport hero), pauses on hover/focus
 // so a card can actually be read, and respects prefers-reduced-motion.
-export default function CircularGallery({ items, radius: maxRadius = 320, autoRotateSpeed = 0.06, className }) {
+export default function CircularGallery({ items, radius: maxRadius = 520, autoRotateSpeed = 0.1, className }) {
   const [rotation, setRotation] = useState(0)
   const [paused, setPaused] = useState(false)
   const [radius, setRadius] = useState(maxRadius)

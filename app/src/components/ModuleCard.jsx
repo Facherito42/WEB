@@ -1,6 +1,13 @@
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
 
-export default function ModuleCard({ icon, iconOnly = true, title, description, to, href }) {
+export default function ModuleCard({
+  icon,
+  iconOnly = true,
+  title,
+  description,
+  to,
+  href,
+}) {
   const cta = href ? (
     <a href={href} className="btn-entrar">
       Entrar
@@ -9,12 +16,12 @@ export default function ModuleCard({ icon, iconOnly = true, title, description, 
     <Link to={to} className="btn-entrar">
       Entrar
     </Link>
-  )
+  );
 
   return (
     <div className="module-card">
       <div className="thumb">
-        <img src={icon} alt={title} className={iconOnly ? 'icon' : undefined} />
+        <img src={icon} alt={title} className={iconOnly ? "icon" : undefined} />
       </div>
       <div className="body">
         <h3>{title}</h3>
@@ -22,5 +29,5 @@ export default function ModuleCard({ icon, iconOnly = true, title, description, 
         {cta}
       </div>
     </div>
-  )
+  );
 }
