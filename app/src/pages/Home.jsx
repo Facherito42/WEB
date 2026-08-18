@@ -9,50 +9,50 @@ import StatsSection from '../components/StatsSection'
 
 const modules = [
   {
-    icon: '/img/modulos/geoportal_igm.svg',
+    icon: `${import.meta.env.BASE_URL}img/modulos/geoportal_igm.svg`,
     iconOnly: false,
     title: 'Geoportal IGM',
     description: 'Un portal geográfico con visores, geoservicios y cobertura nacional vectorial (WFS) del territorio uruguayo.',
     href: 'https://igm.gub.uy/geoportal/',
   },
   {
-    icon: '/img/modulos/servicios_regna_rou.svg',
+    icon: `${import.meta.env.BASE_URL}img/modulos/servicios_regna_rou.svg`,
     title: 'Servicios REGNA-ROU',
     description: 'La Red Geodésica Nacional Activa (REGNA-ROU) ofrece mediciones de precisión mediante estaciones de referencia distribuidas en todo el país.',
     to: '/levantamiento-geodesico',
   },
   {
-    icon: '/img/modulos/sirgas_uruguay.svg',
+    icon: `${import.meta.env.BASE_URL}img/modulos/sirgas_uruguay.svg`,
     title: 'SIRGAS Uruguay',
     description: 'El Instituto Geográfico Militar, a través de la División Geodesia, se encarga de establecer la referencia geodésica oficial del país.',
     href: 'https://www.sirgas.org',
   },
   {
-    icon: '/img/modulos/productos_igm.svg',
+    icon: `${import.meta.env.BASE_URL}img/modulos/productos_igm.svg`,
     title: 'Productos IGM',
     description: 'Cartografía oficial, mapas antiguos y publicaciones del Instituto Geográfico Militar del Uruguay disponibles para su adquisición.',
     to: '/productos-igm',
   },
   {
-    icon: '/img/modulos/visaciones.svg',
+    icon: `${import.meta.env.BASE_URL}img/modulos/visaciones.svg`,
     title: 'Visaciones',
     description: 'Trámite de visación de planos y documentos cartográficos ante el Instituto Geográfico Militar.',
     to: '/visaciones-igm',
   },
   {
-    icon: '/img/modulos/organizacion.svg',
+    icon: `${import.meta.env.BASE_URL}img/modulos/organizacion.svg`,
     title: 'Organización',
     description: 'La estructura administrativa del Instituto Geográfico Militar se encuentra conformada por la Dirección, Subdirección y las distintas Divisiones.',
     to: '/organizacion-igm',
   },
   {
-    icon: '/img/modulos/mapas_antiguos.svg',
+    icon: `${import.meta.env.BASE_URL}img/modulos/mapas_antiguos.svg`,
     title: 'Mapas Antiguos',
     description: 'Consulta el acervo histórico cartográfico del IGM, incluyendo mapas antiguos digitalizados de todo el territorio nacional.',
     to: '/mapas-antiguos-igm',
   },
   {
-    icon: '/img/modulos/capacitacion.svg',
+    icon: `${import.meta.env.BASE_URL}img/modulos/capacitacion.svg`,
     title: 'Capacitación',
     description: 'Cursos y capacitaciones en geomática, geodesia y cartografía dictados por el Instituto Geográfico Militar.',
     to: '/capacitacion-igm',
@@ -60,29 +60,29 @@ const modules = [
 ]
 
 const noticias = [
-  { image: '/img/noticias/CursoBasicoGeomatica.jpg', fecha: '12 de Mayo 2026', title: 'Curso Básico de Geomática: Inscripciones Abiertas', to: '/noticias-actividades-igm2' },
-  { image: '/img/noticias/trabajos-campo-lavalleja.jpg', fecha: '23 de Marzo 2026', title: 'Trabajos de Campo en el Departamento de Lavalleja', to: '/noticias-actividades-igm2' },
-  { image: '/img/noticias/adquisicion-nuevos-gnss.jpeg', fecha: '16 de Diciembre 2025', title: 'Adquisición de nuevos Receptores GNSS para la REGNA-ROU', to: '/noticias-actividades-igm2' },
-  { image: '/img/noticias/relevamiento-piraraja.jpg', fecha: '13 de Noviembre 2025', title: 'Relevamiento Geodésico - Topográfico en Pirarajá', to: '/noticias-actividades-igm2' },
-  { image: '/img/noticias/jornadas-ipgh-2026.jpg', fecha: '18 de Setiembre 2025', title: 'Jornadas del IPGH 2025', to: '/noticias-actividades-igm2' },
-  { image: '/img/noticias/visita-nga.jpg', fecha: '18 de Setiembre 2025', title: 'Visita delegación NGA', to: '/noticias-actividades-igm2' },
+  { image: `${import.meta.env.BASE_URL}img/noticias/CursoBasicoGeomatica.jpg`, fecha: '12 de Mayo 2026', title: 'Curso Básico de Geomática: Inscripciones Abiertas', to: '/noticias-actividades-igm2' },
+  { image: `${import.meta.env.BASE_URL}img/noticias/trabajos-campo-lavalleja.jpg`, fecha: '23 de Marzo 2026', title: 'Trabajos de Campo en el Departamento de Lavalleja', to: '/noticias-actividades-igm2' },
+  { image: `${import.meta.env.BASE_URL}img/noticias/adquisicion-nuevos-gnss.jpeg`, fecha: '16 de Diciembre 2025', title: 'Adquisición de nuevos Receptores GNSS para la REGNA-ROU', to: '/noticias-actividades-igm2' },
+  { image: `${import.meta.env.BASE_URL}img/noticias/relevamiento-piraraja.jpg`, fecha: '13 de Noviembre 2025', title: 'Relevamiento Geodésico - Topográfico en Pirarajá', to: '/noticias-actividades-igm2' },
+  { image: `${import.meta.env.BASE_URL}img/noticias/jornadas-ipgh-2026.jpg`, fecha: '18 de Setiembre 2025', title: 'Jornadas del IPGH 2025', to: '/noticias-actividades-igm2' },
+  { image: `${import.meta.env.BASE_URL}img/noticias/visita-nga.jpg`, fecha: '18 de Setiembre 2025', title: 'Visita delegación NGA', to: '/noticias-actividades-igm2' },
 ]
 
 const servicios = [
   {
-    icon: '/img/modulos/servicios_regna_rou.svg',
+    icon: `${import.meta.env.BASE_URL}img/modulos/servicios_regna_rou.svg`,
     title: 'Servicios REGNA-ROU',
     description: 'La Red Geodésica Nacional Activa del Uruguay (REGNA-ROU) brinda mediciones de precisión mediante un servicio de posicionamiento en tiempo real, sin costo, previo registro.',
     to: '/levantamiento-geodesico',
   },
   {
-    icon: '/img/modulos/geoportal_igm.svg',
+    icon: `${import.meta.env.BASE_URL}img/modulos/geoportal_igm.svg`,
     title: 'Geoportal',
     description: 'Un portal geográfico con visores interactivos, geoservicios WFS y cobertura vectorial nacional para consulta pública.',
     to: '/geoportal-igm',
   },
   {
-    icon: '/img/modulos/capacitacion.svg',
+    icon: `${import.meta.env.BASE_URL}img/modulos/capacitacion.svg`,
     title: 'Capacitación',
     description: 'Cursos de geomática, geodesia y cartografía dictados por especialistas del Instituto Geográfico Militar.',
     to: '/capacitacion-igm',
@@ -90,12 +90,12 @@ const servicios = [
 ]
 
 const links = [
-  { image: '/img/links/ejercito.jpg', label: 'Ejército Nacional' },
-  { image: '/img/links/ipgh.jpg', label: 'IPGH' },
-  { image: '/img/links/inumet.jpg', label: 'INUMET' },
-  { image: '/img/links/sirgas.png', label: 'SIRGAS' },
-  { image: '/img/links/ide.png', label: 'IDE Uruguay' },
-  { image: '/img/links/gub.jpg', label: 'gub.uy' },
+  { image: `${import.meta.env.BASE_URL}img/links/ejercito.jpg`, label: 'Ejército Nacional' },
+  { image: `${import.meta.env.BASE_URL}img/links/ipgh.jpg`, label: 'IPGH' },
+  { image: `${import.meta.env.BASE_URL}img/links/inumet.jpg`, label: 'INUMET' },
+  { image: `${import.meta.env.BASE_URL}img/links/sirgas.png`, label: 'SIRGAS' },
+  { image: `${import.meta.env.BASE_URL}img/links/ide.png`, label: 'IDE Uruguay' },
+  { image: `${import.meta.env.BASE_URL}img/links/gub.jpg`, label: 'gub.uy' },
 ]
 
 export default function Home() {
@@ -105,7 +105,7 @@ export default function Home() {
 
       <div className="hero">
         <video autoPlay muted loop playsInline>
-          <source src="/videos/Hailuo_Video_Keep the original video exactl_545775233654001671.mp4" type="video/mp4" />
+          <source src={`${import.meta.env.BASE_URL}videos/Hailuo_Video_Keep the original video exactl_545775233654001671.mp4`} type="video/mp4" />
         </video>
         <div className="hero-caption">
           <span>Instituto Geográfico Militar</span>
@@ -130,7 +130,7 @@ export default function Home() {
         <p className="section-sub">Instituto Geográfico Militar</p>
 
         <div className="destacada">
-          <img src="/img/noticias/jornadas-ipgh-2026.jpg" alt="Jornadas de IPGH 2026" />
+          <img src={`${import.meta.env.BASE_URL}img/noticias/jornadas-ipgh-2026.jpg`} alt="Jornadas de IPGH 2026" />
           <div>
             <div className="fecha">Publicado: 17 de Julio 2026</div>
             <h3>Jornadas de IPGH 2026</h3>

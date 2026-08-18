@@ -49,7 +49,7 @@ export default function NewsModal() {
         <button type="button" aria-label="Cerrar" onClick={close} className="igm-modal-close">
           &times;
         </button>
-        <img src="/img/noticias/jornadas-ipgh-2026.jpg" alt="Jornadas de IPGH 2026" />
+        <img src={`${import.meta.env.BASE_URL}img/noticias/jornadas-ipgh-2026.jpg`} alt="Jornadas de IPGH 2026" />
         <div className="igm-modal-body">
           <div className="igm-modal-fecha">Publicado: 17 de Julio 2026</div>
           <h3 id="igm-modal-titulo">Jornadas de IPGH 2026</h3>

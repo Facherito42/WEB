@@ -13,7 +13,7 @@ export default function LevantamientoGeodesico() {
     <>
       <PageBanner title="Servicios REGNA-ROU" crumbs={['Servicios', 'Servicios REGNA-ROU']} />
       <section className="content-page">
-        <img className="content-img" src="/img/servicios/regna-rou-estacion.jpg" alt="Servicios REGNA-ROU" />
+        <img className="content-img" src={`${import.meta.env.BASE_URL}img/servicios/regna-rou-estacion.jpg`} alt="Servicios REGNA-ROU" />
         <h2>Red Geodésica Nacional Activa (REGNA-ROU)</h2>
         <p>
           La Red Geodésica Nacional Activa del Uruguay (REGNA-ROU) es un conjunto de estaciones de referencia de operación continua (CORS)
