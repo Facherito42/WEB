@@ -17,7 +17,9 @@ import FormularioContacto from './pages/FormularioContacto'
 import Ubicacion from './pages/Ubicacion'
 import LevantamientoGeodesico from './pages/LevantamientoGeodesico'
 import DescargaRinex from './pages/DescargaRinex'
+import NoticiaDetalle from './pages/NoticiaDetalle'
 import { nav } from './data/nav'
+import { noticias } from './data/noticias'
 
 // Real pages ported from the static site. Paths without a `.jsx` above
 // (limites-brasil-igm, publicaciones-igm, geoportal-igm, enlaces-igm, etc.)
@@ -61,6 +63,11 @@ const dynamicRoutes = leafDestinations(nav).map(({ path, label }) => ({
   element: realPages[path] ?? <PageStub title={label} />,
 }))
 
+const noticiaRoutes = noticias.map(({ slug }) => ({
+  path: `noticias-actividades-igm2/${slug}`,
+  element: <NoticiaDetalle slug={slug} />,
+}))
+
 export const routes = [
   {
     path: '/',
@@ -72,10 +79,7 @@ export const routes = [
     children: [
       { index: true, element: <Home /> },
       ...dynamicRoutes,
-      // Referenced by news cards/modal; no article content existed in the
-      // original static site either (articulos-igm.html was never a real
-      // file — same dead link there).
-      { path: 'articulos-igm', element: <PageStub title="Actualidad IGM" /> },
+      ...noticiaRoutes,
     ],
   },
 ]

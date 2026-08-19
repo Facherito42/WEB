@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { noticias } from '../data/noticias'
 
 const STORAGE_KEY = 'igmNoticiaModalCerrado'
+const featured = noticias[0]
 
 export default function NewsModal() {
   const [open, setOpen] = useState(false)
@@ -49,11 +51,11 @@ export default function NewsModal() {
         <button type="button" aria-label="Cerrar" onClick={close} className="igm-modal-close">
           &times;
         </button>
-        <img src={`${import.meta.env.BASE_URL}img/noticias/jornadas-ipgh-2026.jpg`} alt="Jornadas de IPGH 2026" />
+        <img src={featured.images[0]} alt={featured.title} />
         <div className="igm-modal-body">
-          <div className="igm-modal-fecha">Publicado: 17 de Julio 2026</div>
-          <h3 id="igm-modal-titulo">Jornadas de IPGH 2026</h3>
-          <Link to="/articulos-igm" className="btn-entrar">
+          <div className="igm-modal-fecha">Publicado: {featured.fecha}</div>
+          <h3 id="igm-modal-titulo">{featured.title}</h3>
+          <Link to={`/noticias-actividades-igm2/${featured.slug}`} className="btn-entrar">
             Ver noticia
           </Link>
         </div>

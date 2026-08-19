@@ -6,6 +6,7 @@ import ServicioCard from '../components/ServicioCard'
 import InfoTable from '../components/InfoTable'
 import { InfiniteSlider } from '../components/InfiniteSlider'
 import StatsSection from '../components/StatsSection'
+import { noticias as noticiasData } from '../data/noticias'
 
 const modules = [
   {
@@ -59,14 +60,17 @@ const modules = [
   },
 ]
 
-const noticias = [
-  { image: `${import.meta.env.BASE_URL}img/noticias/CursoBasicoGeomatica.jpg`, fecha: '12 de Mayo 2026', title: 'Curso Básico de Geomática: Inscripciones Abiertas', to: '/noticias-actividades-igm2' },
-  { image: `${import.meta.env.BASE_URL}img/noticias/trabajos-campo-lavalleja.jpg`, fecha: '23 de Marzo 2026', title: 'Trabajos de Campo en el Departamento de Lavalleja', to: '/noticias-actividades-igm2' },
-  { image: `${import.meta.env.BASE_URL}img/noticias/adquisicion-nuevos-gnss.jpeg`, fecha: '16 de Diciembre 2025', title: 'Adquisición de nuevos Receptores GNSS para la REGNA-ROU', to: '/noticias-actividades-igm2' },
-  { image: `${import.meta.env.BASE_URL}img/noticias/relevamiento-piraraja.jpg`, fecha: '13 de Noviembre 2025', title: 'Relevamiento Geodésico - Topográfico en Pirarajá', to: '/noticias-actividades-igm2' },
-  { image: `${import.meta.env.BASE_URL}img/noticias/jornadas-ipgh-2026.jpg`, fecha: '18 de Setiembre 2025', title: 'Jornadas del IPGH 2025', to: '/noticias-actividades-igm2' },
-  { image: `${import.meta.env.BASE_URL}img/noticias/visita-nga.jpg`, fecha: '18 de Setiembre 2025', title: 'Visita delegación NGA', to: '/noticias-actividades-igm2' },
-]
+const featuredNoticia = noticiasData[0]
+
+const noticias = noticiasData
+  .filter((n) => n.images.length > 0)
+  .slice(0, 6)
+  .map((n) => ({
+    image: n.images[0],
+    fecha: n.fecha,
+    title: n.title,
+    to: `/noticias-actividades-igm2/${n.slug}`,
+  }))
 
 const servicios = [
   {
@@ -130,11 +134,11 @@ export default function Home() {
         <p className="section-sub">Instituto Geográfico Militar</p>
 
         <div className="destacada">
-          <img src={`${import.meta.env.BASE_URL}img/noticias/jornadas-ipgh-2026.jpg`} alt="Jornadas de IPGH 2026" />
+          <img src={featuredNoticia.images[0]} alt={featuredNoticia.title} />
           <div>
-            <div className="fecha">Publicado: 17 de Julio 2026</div>
-            <h3>Jornadas de IPGH 2026</h3>
-            <Link to="/articulos-igm" className="btn-entrar">
+            <div className="fecha">Publicado: {featuredNoticia.fecha}</div>
+            <h3>{featuredNoticia.title}</h3>
+            <Link to={`/noticias-actividades-igm2/${featuredNoticia.slug}`} className="btn-entrar">
               Ver noticia
             </Link>
           </div>
