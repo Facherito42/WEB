@@ -20,7 +20,6 @@ const regnaStations = [
   { code: 'UYDU', city: 'Sarandí del Yí (Durazno)', lat: -33.3333, lng: -55.6333 },
   { code: 'UYTA', city: 'Tacuarembó', lat: -31.7333, lng: -55.9833 },
   { code: 'UYRO', city: 'Rocha', lat: -34.4833, lng: -54.3333 },
-
   { code: 'UYAG', city: 'Salto', lat: -31.65401122, lng: -56.59849719 },
   { code: 'UYBA', city: 'Antártida', lat: -62.18451667, lng: -58.90252139 },
   { code: 'UYBU', city: 'Artigas', lat: -30.25364297, lng: -57.60251961 },
