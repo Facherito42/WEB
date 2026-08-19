@@ -14,9 +14,13 @@ export default function NoticiaDetalle({ slug }) {
 
         {noticia.images.length > 0 && (
           <div className="noticia-detalle-galeria">
-            {noticia.images.map((src) => (
-              <img key={src} className="content-img" src={src} alt={noticia.title} />
-            ))}
+            {noticia.images.map((src) =>
+              /\.mp4$/i.test(src) ? (
+                <video key={src} className="content-img" src={src} controls playsInline />
+              ) : (
+                <img key={src} className="content-img" src={src} alt={noticia.title} />
+              ),
+            )}
           </div>
         )}
 

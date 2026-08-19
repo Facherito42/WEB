@@ -154,6 +154,7 @@ h2.section-title{
 .noticia-detalle-fecha{ color:var(--dorado); font-size:.85rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:14px; }
 .noticia-detalle-galeria{ display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:16px; margin:20px 0; }
 .noticia-detalle-galeria img.content-img{ margin:0; width:100%; height:320px; object-fit:contain; }
+.noticia-detalle-galeria video.content-img{ margin:0; width:100%; height:320px; background:#000; border-radius:8px; }
 .notice-box{
   background:var(--gris-claro); border-left:4px solid var(--dorado); padding:16px 20px;
   font-size:.9rem; color:#555; border-radius:4px; margin:20px 0;
