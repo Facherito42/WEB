@@ -259,6 +259,8 @@ h2.section-title{
 table.info-table{ width:100%; border-collapse:collapse; margin-bottom:30px; font-size:.85rem; }
 table.info-table td, table.info-table th{ border:1px solid #ddd; padding:10px 12px; text-align:left; vertical-align:top;}
 table.info-table th{ background:var(--verde-igm); color:#fff; }
+table.limites-table{ font-size:.85rem; }
+table.limites-table td.num{ text-align:right; white-space:nowrap; }
 
 /* Staff / directors grid */
 .staff-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:22px; }

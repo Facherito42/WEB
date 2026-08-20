@@ -18,13 +18,18 @@ import Ubicacion from './pages/Ubicacion'
 import LevantamientoGeodesico from './pages/LevantamientoGeodesico'
 import DescargaRinex from './pages/DescargaRinex'
 import NoticiaDetalle from './pages/NoticiaDetalle'
+import LimitesBrasil from './pages/LimitesBrasil'
+import LimitesArgentina from './pages/LimitesArgentina'
+import PuntosExtremos from './pages/PuntosExtremos'
+import SituacionGeografica from './pages/SituacionGeografica'
+import DivisionPolitica from './pages/DivisionPolitica'
 import { nav } from './data/nav'
 import { noticias } from './data/noticias'
 
 // Real pages ported from the static site. Paths without a `.jsx` above
-// (limites-brasil-igm, publicaciones-igm, geoportal-igm, enlaces-igm, etc.)
-// didn't exist as files in the original static site either — they're
-// dead links there too, so they fall back to the "not migrated" stub.
+// (publicaciones-igm, geoportal-igm, enlaces-igm, etc.) didn't exist as
+// files in the original static site either — they're dead links there
+// too, so they fall back to the "not migrated" stub.
 const realPages = {
   '/historia-igm': <Historia />,
   '/mision-y-vision-igm': <MisionYVision />,
@@ -41,6 +46,11 @@ const realPages = {
   '/ubicacion-igm': <Ubicacion />,
   '/levantamiento-geodesico': <LevantamientoGeodesico />,
   '/descarga-rinex': <DescargaRinex />,
+  '/limites-brasil-igm': <LimitesBrasil />,
+  '/limites-argentina-igm': <LimitesArgentina />,
+  '/puntos-extremos-igm': <PuntosExtremos />,
+  '/situacion-geografica-igm': <SituacionGeografica />,
+  '/division-politica-igm': <DivisionPolitica />,
 }
 
 function leafDestinations(items) {
