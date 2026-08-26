@@ -43,6 +43,15 @@ export const nav = [
   },
   { label: 'Publicaciones', to: '/publicaciones-igm' },
   {
+    label: 'SIRGAS',
+    to: '/sirgas',
+    children: [
+      { label: '¿Qué es?', to: '/sirgas-que-es' },
+      { label: 'Simposio', to: '/sirgas-simposio' },
+      { label: 'Contacto', to: '/sirgas-contacto' },
+    ],
+  },
+  {
     label: 'Actualidad IGM',
     to: '/actualidad',
     children: [{ label: 'Noticias', to: '/noticias-actividades-igm2' }],

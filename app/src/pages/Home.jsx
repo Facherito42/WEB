@@ -62,15 +62,16 @@ const modules = [
 
 const featuredNoticia = noticiasData[0]
 
-const noticias = noticiasData
-  .filter((n) => n.images.length > 0)
-  .slice(0, 6)
-  .map((n) => ({
-    image: n.images[0],
-    fecha: n.fecha,
-    title: n.title,
-    to: `/noticias-actividades-igm2/${n.slug}`,
-  }))
+const noticias = noticiasData.flatMap((n) =>
+  n.images
+    .filter((image) => !/\.mp4$/i.test(image))
+    .map((image) => ({
+      image,
+      fecha: n.fecha,
+      title: n.title,
+      to: `/noticias-actividades-igm2/${n.slug}`,
+    })),
+)
 
 const servicios = [
   {

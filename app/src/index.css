@@ -46,9 +46,12 @@
 *{box-sizing:border-box;}
 body{
   margin:0;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
   color: var(--gris-texto);
   background:#fff;
+}
+h1, h2, h3, h4, h5, h6{
+  font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
 }
 a{ text-decoration:none; color:inherit; }
 ul{ list-style:none; margin:0; padding:0; }
@@ -177,13 +180,32 @@ h2.section-title{
 .module-card .body{ padding:18px; flex:1; display:flex; flex-direction:column; }
 .module-card h3{ color:var(--verde-igm); font-size:1.05rem; margin:0 0 8px; }
 .module-card p{ font-size:.85rem; color:#555; flex:1; line-height:1.4; }
-.btn-entrar{
-  margin-top:12px; align-self:flex-start; background:var(--dorado); color:#1c1c1c;
-  padding:8px 18px; border-radius:4px; font-size:.8rem; font-weight:700; text-transform:uppercase;
-  transition:background .15s, transform .1s;
+/* Buttons — unified system: primary (solid gold, main calls to action),
+   secondary (outline), utility (compact, inline actions like table
+   downloads). Shared base + per-role overrides so every button on the
+   site shares the same shape/motion language. */
+.btn-entrar,
+.form-page button,
+.ver-historial a,
+.btn-outline,
+.btn-download{
+  display:inline-block; border-radius:4px; font-weight:700; cursor:pointer;
+  transition:background .15s, color .15s, transform .1s;
 }
-.btn-entrar:hover{ background:var(--verde-igm); color:#fff; }
-.btn-entrar:active{ transform:scale(.97); }
+.btn-entrar:active,
+.form-page button:active,
+.ver-historial a:active,
+.btn-outline:active,
+.btn-download:active{ transform:scale(.97); }
+
+.btn-entrar,
+.form-page button{
+  background:var(--dorado); color:#1c1c1c; border:none;
+  padding:10px 26px; font-size:.85rem; text-transform:uppercase; letter-spacing:.03em;
+}
+.btn-entrar:hover,
+.form-page button:hover{ background:var(--verde-igm); color:#fff; }
+.btn-entrar{ margin-top:12px; align-self:flex-start; }
 
 /* Actualidad (home) */
 .destacada{
@@ -210,12 +232,10 @@ h2.section-title{
 
 .ver-historial{ text-align:center; margin-top:30px; }
 .ver-historial a, .btn-outline{
-  display:inline-block; border:2px solid var(--verde-igm); color:var(--verde-igm);
-  padding:10px 26px; border-radius:4px; font-weight:700; text-transform:uppercase; font-size:.85rem;
-  transition:background .15s, color .15s, transform .1s;
+  border:2px solid var(--verde-igm); color:var(--verde-igm); background:transparent;
+  padding:10px 26px; font-size:.85rem; text-transform:uppercase; letter-spacing:.03em;
 }
 .ver-historial a:hover, .btn-outline:hover{ background:var(--verde-igm); color:#fff; }
-.ver-historial a:active, .btn-outline:active{ transform:scale(.97); }
 
 /* Servicios */
 .servicios{ background:var(--verde-igm-osc); color:#fff; }
@@ -313,7 +333,7 @@ table.limites-table td.num{ text-align:right; white-space:nowrap; }
 .org-card.top { background: var(--verde-igm-osc); border-color: var(--verde-igm-osc); color: var(--dorado); text-align: center; }
 .org-card .name { font-weight: 700; font-size: 0.92rem; display: block; }
 .org-card .rank { font-size: 0.78rem; opacity: 0.85; display: block; margin-top: 2px; }
-.org-card .role { font-size: 0.78rem; color: #14406b; display: block; margin-top: 4px; }
+.org-card .role { font-size: 0.78rem; color: var(--verde-igm-osc); display: block; margin-top: 4px; }
 .org-card.top .role { color: var(--dorado); }
 
 /* Timeline (historia-igm) */
@@ -333,10 +353,10 @@ table.limites-table td.num{ text-align:right; white-space:nowrap; }
   padding: 14px 18px; margin-bottom: 10px; background: #fafbfc;
 }
 .faq summary, .visa-faq summary {
-  cursor: pointer; font-weight: 600; color: #14406b; list-style: none;
+  cursor: pointer; font-weight: 600; color: var(--verde-igm-osc); list-style: none;
 }
 .faq summary::-webkit-details-marker, .visa-faq summary::-webkit-details-marker { display: none; }
-.faq summary::before, .visa-faq summary::before { content: "+ "; color: #14406b; }
+.faq summary::before, .visa-faq summary::before { content: "+ "; color: var(--verde-igm-osc); }
 .faq details[open] summary::before, .visa-faq details[open] summary::before { content: "\2013 "; }
 .faq p { margin: 10px 0 0; color: #333; }
 .visa-faq p, .visa-faq ul { margin: 10px 0 0; color: #333; }
@@ -348,7 +368,7 @@ table.limites-table td.num{ text-align:right; white-space:nowrap; }
   border:1px solid #e0e4e8; border-radius:8px; padding:18px 20px;
   margin-bottom:16px; background:#fafbfc;
 }
-.curso-card h3{ margin:0 0 10px; color:#14406b; font-size:1.05rem; }
+.curso-card h3{ margin:0 0 10px; color:var(--verde-igm-osc); font-size:1.05rem; }
 .curso-card ul{ margin:0; padding-left:20px; }
 .curso-card ul li{ margin-bottom:6px; }
 .curso-aviso{
@@ -359,7 +379,7 @@ table.limites-table td.num{ text-align:right; white-space:nowrap; }
 /* Visaciones tarifas */
 table.tarifas { width:100%; border-collapse: collapse; margin: 16px 0; }
 table.tarifas th, table.tarifas td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e5e5e5; font-size: 0.92rem; }
-table.tarifas th { background: #14406b; color: #fff; }
+table.tarifas th { background: var(--verde-igm-osc); color: #fff; }
 
 /* Forms */
 .form-page form{ display:grid; gap:16px; max-width:640px; }
@@ -372,13 +392,7 @@ table.tarifas th { background: #14406b; color: #fff; }
   border-color:var(--verde-igm); box-shadow:0 0 0 3px rgba(27,75,129,.15); outline:none;
 }
 .form-page textarea{ min-height:120px; }
-.form-page button{
-  justify-self:start; background:var(--dorado); color:#1c1c1c; border:none; padding:12px 30px;
-  border-radius:4px; font-weight:700; text-transform:uppercase; font-size:.85rem; cursor:pointer;
-  transition:background .15s, transform .1s;
-}
-.form-page button:hover{ background:var(--verde-igm); color:#fff; }
-.form-page button:active{ transform:scale(.97); }
+.form-page button{ justify-self:start; }
 .form-note{ font-size:.8rem; color:#888; margin-top:10px; }
 
 /* Footer */
@@ -644,7 +658,7 @@ textarea:focus-visible,
 }
 .igm-modal-close:hover { background: rgba(0,0,0,0.7); }
 .igm-modal-fecha { font-size: 0.82rem; color: #777; margin: 14px 0 4px; }
-.igm-modal-body h3 { margin: 0 0 12px; color: #14406b; }
+.igm-modal-body h3 { margin: 0 0 12px; color: var(--verde-igm-osc); }
 
 /* Descarga RINEX — from the inline <style> block in descarga-rinex.html */
 .rinex-wrap { max-width: 1000px; margin: 0 auto; }
@@ -660,18 +674,17 @@ textarea:focus-visible,
   background: #fff;
 }
 .rinex-breadcrumb { font-size: 0.9rem; color: #555; margin-bottom: 10px; }
-.rinex-breadcrumb span { font-weight: 600; color: #14406b; }
+.rinex-breadcrumb span { font-weight: 600; color: var(--verde-igm-osc); }
 table.rinex-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
 table.rinex-table th, table.rinex-table td {
   text-align: left; padding: 10px 12px; border-bottom: 1px solid #e5e5e5; font-size: 0.92rem;
 }
-table.rinex-table th { background: #14406b; color: #fff; }
+table.rinex-table th { background: var(--verde-igm-osc); color: #fff; }
 table.rinex-table tr:hover { background: #f1f6fb; }
 .btn-download {
-  display: inline-block; padding: 6px 14px; border-radius: 5px;
-  background: #14406b; color: #fff; text-decoration: none; font-size: 0.85rem;
+  padding: 7px 16px; background: var(--verde-igm-osc); color: #fff; font-size: 0.85rem;
 }
-.btn-download:hover { background: #0d2c4a; }
+.btn-download:hover { background: var(--verde-igm); }
 .rinex-empty { padding: 30px; text-align: center; color: #777; font-style: italic; }
 .rinex-note {
   background: #fff8e6; border: 1px solid #f0d998; border-radius: 6px;

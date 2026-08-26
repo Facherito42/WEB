@@ -16,7 +16,12 @@ import NoticiasActividades from './pages/NoticiasActividades'
 import FormularioContacto from './pages/FormularioContacto'
 import Ubicacion from './pages/Ubicacion'
 import LevantamientoGeodesico from './pages/LevantamientoGeodesico'
+import SirgasQueEs from './pages/SirgasQueEs'
+import SirgasSimposio from './pages/SirgasSimposio'
+import SirgasContacto from './pages/SirgasContacto'
 import DescargaRinex from './pages/DescargaRinex'
+import Publicaciones from './pages/Publicaciones'
+import Enlaces from './pages/Enlaces'
 import NoticiaDetalle from './pages/NoticiaDetalle'
 import LimitesBrasil from './pages/LimitesBrasil'
 import LimitesArgentina from './pages/LimitesArgentina'
@@ -45,7 +50,12 @@ const realPages = {
   '/formulario-de-contacto': <FormularioContacto />,
   '/ubicacion-igm': <Ubicacion />,
   '/levantamiento-geodesico': <LevantamientoGeodesico />,
+  '/sirgas-que-es': <SirgasQueEs />,
+  '/sirgas-simposio': <SirgasSimposio />,
+  '/sirgas-contacto': <SirgasContacto />,
   '/descarga-rinex': <DescargaRinex />,
+  '/publicaciones-igm': <Publicaciones />,
+  '/enlaces-igm': <Enlaces />,
   '/limites-brasil-igm': <LimitesBrasil />,
   '/limites-argentina-igm': <LimitesArgentina />,
   '/puntos-extremos-igm': <PuntosExtremos />,
