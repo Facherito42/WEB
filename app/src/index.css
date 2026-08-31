@@ -394,6 +394,9 @@ table.tarifas th { background: var(--verde-igm-osc); color: #fff; }
 .form-page textarea{ min-height:120px; }
 .form-page button{ justify-self:start; }
 .form-note{ font-size:.8rem; color:#888; margin-top:10px; }
+.contact-list{ margin:18px 0 24px; display:grid; gap:10px; max-width:640px; }
+.contact-list li{ padding:12px 14px; background:var(--gris-claro); border-radius:4px; font-size:.95rem; }
+.contact-list a{ color:var(--verde-igm-osc); text-decoration:underline; }
 
 /* Footer */
 footer{ background:var(--verde-igm-osc); color:#cfd6da; padding:40px 20px 10px; }

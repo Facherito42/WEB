@@ -1,0 +1,9 @@
+# https://www.rfc-editor.org/rfc/rfc9116
+# Canal para reportar vulnerabilidades de seguridad de este sitio.
+# ACTUALIZAR el correo si el IGM define una casilla específica de seguridad,
+# y renovar la fecha Expires antes de que venza.
+
+Contact: mailto:comercial@igm.gub.uy
+Expires: 2027-08-31T00:00:00.000Z
+Preferred-Languages: es
+Canonical: https://rinex.igm.gub.uy/.well-known/security.txt

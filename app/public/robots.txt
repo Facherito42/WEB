@@ -1,0 +1,6 @@
+# Sitio público del Instituto Geográfico Militar del Uruguay.
+User-agent: *
+Allow: /
+
+# Endpoint de descarga de archivos (no aporta valor indexarlo).
+Disallow: /rinex-data/

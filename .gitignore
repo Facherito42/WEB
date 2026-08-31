@@ -1,0 +1,15 @@
+# Secretos y configuración local — nunca commitear
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.*
+
+# Vercel
+.vercel
+
+# Sistema operativo / editor
+.DS_Store
+Thumbs.db
+*.local
