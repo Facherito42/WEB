@@ -22,7 +22,12 @@ export default function SirgasContacto() {
           <Link to="/formulario-de-contacto">formulario de contacto</Link> institucional.
         </p>
 
-        
+        <img
+          className="content-img"
+          style={{ width: '100%', maxWidth: 520, margin: '30px auto 0' }}
+          src={`${import.meta.env.BASE_URL}img/sirgas/sirgas-igm-logos.png`}
+          alt="Logotipos de SIRGAS y del Instituto Geográfico Militar del Uruguay"
+        />
       </section>
     </>
   )

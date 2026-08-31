@@ -32,6 +32,12 @@ export default function SirgasSimposio() {
     <>
       <PageBanner title="Simposio SIRGAS 2026" crumbs={['SIRGAS', 'Simposio']} />
       <section className="content-page">
+        <img
+          className="content-img"
+          style={{ width: '100%' }}
+          src={`${import.meta.env.BASE_URL}img/sirgas/simposio-2026-invitacion.png`}
+          alt="Simposio SIRGAS 2026 — 3 al 6 de noviembre, Facultad de Ingeniería, Montevideo, Uruguay"
+        />
         <p>
           Montevideo será sede del Simposio SIRGAS 2026, organizado por el Comité Ejecutivo de SIRGAS junto con el Instituto Geográfico
           Militar del Uruguay. El evento busca reforzar la adopción del marco geodésico SIRGAS y la colaboración regional, en línea con las
@@ -47,6 +53,19 @@ export default function SirgasSimposio() {
             </details>
           ))}
         </div>
+
+        <h2>9ª Escuela SIRGAS</h2>
+        <p>
+          En paralelo al simposio se dicta la 9ª Escuela SIRGAS sobre «Sistemas y Marcos de Referencia», con una etapa teórica virtual
+          (19 al 23 y 26 al 30 de octubre de 2026) y una etapa práctica presencial (9 al 13 de noviembre de 2026) en la Facultad de
+          Ingeniería.
+        </p>
+        <img
+          className="content-img"
+          style={{ width: '100%' }}
+          src={`${import.meta.env.BASE_URL}img/sirgas/escuela-sirgas.png`}
+          alt="9ª Escuela SIRGAS sobre Sistemas y Marcos de Referencia — etapa teórica virtual y práctica presencial"
+        />
 
         <h2>Fechas clave</h2>
         <table className="info-table">
@@ -65,6 +84,13 @@ export default function SirgasSimposio() {
             ))}
           </tbody>
         </table>
+
+        <img
+          className="content-img"
+          style={{ width: '100%', maxWidth: 440, margin: '20px auto' }}
+          src={`${import.meta.env.BASE_URL}img/sirgas/flyer-simposio-2026.png`}
+          alt="Flyer del Simposio SIRGAS 2026 y la 9ª Escuela SIRGAS con fechas de inscripción"
+        />
 
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 20 }}>
           <a

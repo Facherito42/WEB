@@ -80,10 +80,10 @@ nav.main-nav > ul, nav.main-nav > div > ul{
 nav.main-nav > ul > li, nav.main-nav > div > ul > li{ position:relative; }
 nav.main-nav > ul > li > a, nav.main-nav > ul > li > button,
 nav.main-nav > div > ul > li > a, nav.main-nav > div > ul > li > button{
-  display:block; padding:14px 18px; color:#fff; font-size:.9rem;
-  text-transform:uppercase; letter-spacing:.03em; font-weight:600;
+  display:block; padding:14px 12px; color:#fff; font-size:.8rem;
+  text-transform:uppercase; letter-spacing:.01em; font-weight:600;
   transition:background .15s; background:none; border:none; cursor:pointer;
-  font-family:inherit; width:100%; text-align:left;
+  font-family:inherit; width:100%; text-align:left; white-space:nowrap;
 }
 nav.main-nav > ul > li.active > a,
 nav.main-nav > ul > li.active > button,
