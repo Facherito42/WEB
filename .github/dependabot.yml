@@ -1,5 +1,10 @@
 # Dependabot: avisa (y abre PRs) cuando una dependencia tiene una
 # actualización o una vulnerabilidad conocida.
+#
+# Se ignoran los saltos de versión MAYOR: en este repo varias dependencias
+# están acopladas (vite-react-ssg exige react-router-dom v6, etc.) y un
+# major automático rompe el build. Las actualizaciones de seguridad siguen
+# llegando aunque sean de una versión mayor.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -7,8 +12,11 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
-      dev-minor:
+      minor-patch:
         patterns: ["*"]
         update-types: ["minor", "patch"]
 
@@ -17,6 +25,9 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
