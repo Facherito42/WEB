@@ -62,7 +62,8 @@ async def security_headers(request: Request, call_next):
     resp.headers.setdefault("X-Frame-Options", "DENY")
     resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
     resp.headers.setdefault("Content-Security-Policy", "default-src 'none'")
-    resp.headers.pop("server", None)
+    if "server" in resp.headers:
+        del resp.headers["server"]
     return resp
 
 
