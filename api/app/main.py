@@ -9,38 +9,17 @@ import json
 import re
 import threading
 import time
+from collections import defaultdict, deque
 from pathlib import PurePosixPath
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
-from slowapi import Limiter
-from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 
 from . import config
 from .ftputil import ftp_conn
 
-
-def client_ip(request: Request) -> str:
-    """IP real del cliente. Detrás de IIS/ARR viene en X-Forwarded-For."""
-    if config.TRUST_PROXY:
-        fwd = request.headers.get("x-forwarded-for")
-        if fwd:
-            return fwd.split(",")[0].strip()
-    return get_remote_address(request)
-
-
-limiter = Limiter(key_func=client_ip, default_limits=["120/minute"])
-
 app = FastAPI(title="RINEX API", docs_url=None, redoc_url=None, openapi_url=None)
-app.state.limiter = limiter
-
-
-@app.exception_handler(RateLimitExceeded)
-def _ratelimit_handler(request: Request, exc: RateLimitExceeded):
-    return JSONResponse({"detail": "Demasiadas peticiones. Probá en un minuto."}, status_code=429)
-
 
 if config.ALLOW_ORIGIN:
     app.add_middleware(
@@ -49,6 +28,31 @@ if config.ALLOW_ORIGIN:
         allow_methods=["GET"],
         allow_headers=["*"],
     )
+
+
+# --- Rate limiting simple, en memoria (sin dependencias externas) -------------
+_hits: dict[str, deque] = defaultdict(deque)
+_hits_lock = threading.Lock()
+
+
+def _client_ip(request: Request) -> str:
+    if config.TRUST_PROXY:
+        fwd = request.headers.get("x-forwarded-for")
+        if fwd:
+            return fwd.split(",")[0].strip()
+    return request.client.host if request.client else "?"
+
+
+def _rate_ok(ip: str, limit: int, window: int = 60) -> bool:
+    now = time.time()
+    with _hits_lock:
+        dq = _hits[ip]
+        while dq and dq[0] <= now - window:
+            dq.popleft()
+        if len(dq) >= limit:
+            return False
+        dq.append(now)
+        return True
 
 
 @app.middleware("http")
@@ -129,16 +133,18 @@ def _fetch_from_ftp(rel: str, dest) -> None:
 
 
 @app.get("/rinex-data/rinex.json")
-@limiter.limit("60/minute")
 def manifest(request: Request):
+    if not _rate_ok(_client_ip(request), config.RATE_MANIFEST):
+        raise HTTPException(429, "Demasiadas peticiones. Probá en un minuto.")
     if not config.MANIFEST.exists():
         raise HTTPException(503, "El índice todavía no se generó.")
     return FileResponse(config.MANIFEST, media_type="application/json")
 
 
 @app.get("/rinex-data/raw/{rel:path}")
-@limiter.limit(config.RATE_LIMIT)
 def download(request: Request, rel: str):
+    if not _rate_ok(_client_ip(request), config.RATE_DOWNLOAD):
+        raise HTTPException(429, "Demasiadas descargas. Probá en un minuto.")
     if not _valid(rel):
         raise HTTPException(400, "Ruta inválida.")
     if rel not in _manifest_paths():

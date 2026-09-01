@@ -11,17 +11,22 @@ aplican. Lo que queda a cuidar:
 | **Defacement / integridad** | Que alguien altere el sitio o sirva malware desde él | Servidor endurecido + acceso restringido (IT) |
 | **Disponibilidad (DDoS)** | Que tiren el sitio con tráfico masivo | CDN/WAF + rate limiting |
 | **Abuso de la API** | Martillar el FTP interno a través del proxy, llenar disco | Límites en la API (ya implementados) |
-| **Compromiso del servidor** | Entrar a la VM por un servicio expuesto o sin parches | Firewall, parches, RDP con MFA (IT) |
+| **Compromiso del servidor** | Entrar al servidor por un servicio expuesto o sin parches | Firewall, parches, SSH con clave (IT) |
 | **Cadena de suministro** | Una dependencia (npm/pip) con código malicioso | Versiones fijadas + `npm audit` / revisión |
-| **Fuga de información** | Cabeceras, listados de directorio, mensajes de error, source maps | Config de IIS + build de producción |
+| **Fuga de información** | Cabeceras, listados de directorio, mensajes de error, source maps | Config de Nginx + build de producción |
 | **Transporte** | Tráfico sin cifrar o TLS mal configurado | HTTPS obligatorio + config TLS (IT) |
-| **Credenciales FTP en la VM** | El `.env` con la clave de `geodesia` | Permisos NTFS + no commitear |
+| **Credenciales FTP en el servidor** | El `.env` de la API (hoy el FTP es anónimo, sin clave) | Permisos de archivo + no commitear |
+
+> **Infra:** el servicio corre en un servidor **Ubuntu 24.04** dentro de la red
+> del IGM (IP interna `192.168.100.134`). La API es FastAPI bajo systemd, Nginx
+> hace de reverse proxy. Todo lo que abajo dice "IIS" o "web.config" quedó
+> reemplazado por Nginx (`api/deploy/nginx-sirgas-uy.conf`).
 
 ---
 
 ## 1. Qué se hizo ahora (en este repo)
 
-### 1.1 Cabeceras de seguridad en IIS — [`api/iis/web.config`](../api/iis/web.config)
+### 1.1 Cabeceras de seguridad en Nginx — [`api/deploy/nginx-sirgas-uy.conf`](../api/deploy/nginx-sirgas-uy.conf)
 
 Cada respuesta del sitio manda:
 
@@ -33,7 +38,7 @@ Cada respuesta del sitio manda:
 | `X-Frame-Options: DENY` | Nadie puede meter el sitio en un `<iframe>` (anti *clickjacking*). |
 | `Referrer-Policy` | Limita qué URL de origen se filtra al navegar a otros sitios. |
 | `Permissions-Policy` | Apaga cámara, micrófono, geolocalización, etc. que el sitio no usa. |
-| `removeServerHeader` + quitar `X-Powered-By` | No revelar versión de IIS/ASP.NET. |
+| `server_tokens off` (Nginx) + uvicorn `--no-server-header` | No revelar versión del servidor. |
 
 > **Nota sobre la CSP:** `script-src` incluye `'unsafe-inline'` porque
 > vite-react-ssg embebe un `<script>` chico de hidratación en cada página.
@@ -109,39 +114,40 @@ limiting, validación server-side y un relay de correo — documentar aparte.
 
 ### 2.1 Nuestro equipo (código / despliegue)
 
-- [ ] Al desplegar en IIS: copiar [`api/iis/web.config`](../api/iis/web.config)
-      a la raíz del sitio y **probar la CSP** (consola del navegador, página del mapa).
-- [ ] Activar `Strict-Transport-Security` **solo** cuando el dominio sirva 100 % HTTPS.
+- [ ] Al desplegar: instalar [`api/deploy/nginx-sirgas-uy.conf`](../api/deploy/nginx-sirgas-uy.conf)
+      y **probar la CSP** (consola del navegador, página del mapa).
+- [ ] Descomentar `Strict-Transport-Security` en el `.conf` **solo** cuando el
+      dominio sirva 100 % HTTPS.
 - [ ] `cd app && npm audit` antes de cada despliegue; actualizar dependencias con
       vulnerabilidades altas/críticas. (En la red del IGM `npm audit` puede fallar
       por el proxy con certificado propio; correrlo desde otra red o revisar los
       PRs de Dependabot.)
 - [ ] Fijar versiones de las dependencias de la API (ya está en
       [`api/requirements.txt`](../api/requirements.txt)); revisar `pip-audit` de vez en cuando.
-- [ ] `.env` de la API: `icacls` restringido a la cuenta de servicio (ver README).
-- [ ] Publicar un archivo `/.well-known/security.txt` con un contacto para
-      reportar vulnerabilidades (lo pide el marco de CERTuy).
+- [ ] `.env` de la API en `chmod 600` y propiedad del usuario `rinex`
+      (el `install.sh` ya lo hace).
+- [ ] Publicar `/.well-known/security.txt` con un contacto (lo pide CERTuy) — hecho.
 
 ### 2.2 Área de IT del IGM (infraestructura)
 
 Pasale esta lista:
 
+- [ ] **Dominio + NAT**: publicar `192.168.100.134` (puerto 443) con un dominio
+      `.gub.uy`, o ponerlo detrás del reverse proxy que ya tenga IT.
 - [ ] **HTTPS obligatorio**: redirección 80→443, certificado válido, TLS 1.2+
-      solamente, sin SSLv3/TLS 1.0/1.1. Verificar en <https://www.ssllabs.com/ssltest/>.
-- [ ] **Firewall de la VM**: exponer a internet **solo el 443**. RDP (3389)
-      **nunca** hacia internet — solo por VPN o red de administración.
-- [ ] **RDP con MFA** y contraseñas fuertes; renombrar/deshabilitar la cuenta
-      Administrador por defecto.
-- [ ] **Parches automáticos** de Windows Server e IIS.
-- [ ] **Antivirus/EDR** en la VM (Defender alcanza).
-- [ ] **Backups** del sitio y de la config (`web.config`, `.env`, scripts) y
-      prueba de restauración.
-- [ ] **Segmentación de red**: la VM necesita llegar a `192.168.100.96:21` y a
-      los puertos pasivos del FTP, nada más hacia la LAN interna.
-- [ ] **Logs**: guardar logs de IIS y de la API; idealmente enviarlos a un
-      recolector central. Revisar picos de 404 / 429.
-- [ ] **Cuenta de servicio** dedicada (no Administrador) para el servicio de la
-      API y la tarea programada, con permisos mínimos.
+      solamente. Verificar en <https://www.ssllabs.com/ssltest/>. Si se expone
+      directo, se puede usar `certbot` (Let's Encrypt).
+- [ ] **Firewall del servidor**: desde internet, **solo 443** (y 80 para el
+      redirect). **SSH (22) nunca** hacia internet — solo por VPN / red de admin.
+- [ ] **SSH con clave pública** (no contraseña); `PermitRootLogin no`.
+- [ ] **Parches automáticos**: `unattended-upgrades` habilitado.
+- [ ] **Backups** de `/var/www/sirgas-uy`, `/opt/rinex-api/.env` y
+      `/etc/nginx/sites-available/sirgas-uy`, con prueba de restauración.
+- [ ] **Segmentación de red**: el servidor necesita llegar a
+      `192.168.100.96:21` (FTP datos), nada más hacia la LAN interna.
+- [ ] **Logs**: `journalctl` de `rinex-api`/`nginx` a un recolector central si
+      lo hay. Revisar picos de 404 / 429.
+- [ ] **fail2ban** para SSH y, opcionalmente, para picos de 429 en Nginx.
 - [ ] Evaluar un **WAF / CDN** delante (ver sección 3).
 - [ ] Registrar el sistema ante **CERTuy** si corresponde y conocer el canal de
       reporte de incidentes.
@@ -190,13 +196,14 @@ necesariamente del endpoint de descargas) es una mejora barata.
 
 ## 4. Checklist de verificación post-despliegue
 
-- [ ] `https://rinex.igm.gub.uy` carga y **redirige** desde `http://`
+- [ ] El sitio carga y **redirige** de `http://` a `https://` (cuando haya dominio)
 - [ ] <https://securityheaders.com> da nota **A** o superior
 - [ ] <https://www.ssllabs.com/ssltest/> da nota **A** o superior
 - [ ] La consola del navegador no muestra errores de CSP (probar mapa + fuentes)
-- [ ] `https://rinex.igm.gub.uy/rinex-data/raw/` → **no** lista el directorio
+- [ ] `.../rinex-data/raw/` → **no** lista el directorio
 - [ ] Pedir 40 veces seguidas un archivo → a partir de ~30 devuelve **429**
 - [ ] `.../raw/../../etc/passwd` y similares → **400 / 404**
-- [ ] `curl -I` al sitio: no aparece `Server: Microsoft-IIS/...` ni `X-Powered-By`
-- [ ] RDP no responde desde fuera de la red de administración
+- [ ] `curl -I` al sitio: no aparece la versión de Nginx en `Server:`
+- [ ] `ss -tlnp` en el server: la API escucha solo en `127.0.0.1:8000`, no en `0.0.0.0`
+- [ ] SSH no responde desde fuera de la red de administración
 - [ ] Existe `/.well-known/security.txt` con un contacto

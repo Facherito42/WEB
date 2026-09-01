@@ -1,0 +1,10 @@
+[Unit]
+Description=Corre el indexador RINEX cada 3 horas
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=3h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

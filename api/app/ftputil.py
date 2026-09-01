@@ -9,7 +9,11 @@ from . import config
 def ftp_conn():
     ftp = ftplib.FTP()
     ftp.connect(config.FTP_HOST, 21, timeout=30)
-    ftp.login(config.FTP_USER, config.FTP_PASS)
+    user = (config.FTP_USER or "anonymous").strip()
+    if user.lower() == "anonymous":
+        ftp.login("anonymous", config.FTP_PASS or "rinex@igm.gub.uy")
+    else:
+        ftp.login(user, config.FTP_PASS)
     ftp.set_pasv(True)
     try:
         yield ftp
@@ -34,8 +38,11 @@ def listdir(ftp, path):
             is_dir = facts.get("type") == "dir"
             size = int(facts.get("size", 0) or 0)
             out.append((name, is_dir, size))
-        return out
+        if out:
+            return out
     except ftplib.error_perm:
+        pass
+    except ftplib.error_proto:
         pass
 
     out = []

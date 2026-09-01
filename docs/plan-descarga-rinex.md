@@ -1,271 +1,193 @@
-# API de descarga de archivos RINEX — plan de implementación
+# Descarga de archivos RINEX — despliegue (Ubuntu 24.04)
 
-Servicio que consume la página
+Runbook para dejar andando la descarga que consume
 [`app/src/pages/DescargaRinex.jsx`](../app/src/pages/DescargaRinex.jsx).
 
-> **Modelo elegido:** API "proxy". Una VM Windows dentro de la red del IGM
-> corre una API FastAPI que, ante cada pedido, se conecta al FTP interno
-> `192.168.100.96`, trae el archivo y lo reenvía al usuario (con un caché
-> local chico). **No se replica el histórico de 100 GB.**
+> **Modelo:** API "proxy". Una API FastAPI en el servidor Linux del IGM recibe
+> los pedidos, trae el archivo del FTP interno `192.168.100.96` (login anónimo)
+> y lo reenvía, con un caché local acotado. **No se replica el histórico.**
 
 ---
 
-## 1. Arquitectura
-
-```
-                        Internet
-                           │  https://rinex.igm.gub.uy
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│  VM Windows Server  (dentro de la LAN del IGM)           │
-│                                                         │
-│   IIS  (443, TLS, reverse proxy)                         │
-│     ├─ /                → sitio React (build estático)   │
-│     └─ /rinex-data/*    → http://127.0.0.1:8000          │
-│                              │                          │
-│   FastAPI + uvicorn  (127.0.0.1:8000, servicio Windows)  │
-│     ├─ GET /rinex-data/rinex.json   → manifiesto cacheado│
-│     └─ GET /rinex-data/raw/<path>   → trae del FTP + cache│
-│                              │                          │
-│   Tarea programada (cada 3 h): indexer.py               │
-│     recorre el FTP y reescribe rinex.json               │
-└──────────────────────────────┼──────────────────────────┘
-                               │ FTP (21, pasivo)
-                               ▼
-                    192.168.100.96  usuario: geodesia
-        /home/igmrou/ftp/regna/<EST>/<AAAA>/<MM>/<DD>/Diario/<archivo>
-```
-
-### Contrato con el frontend (ya implementado en la página, no tocar)
-
-- `GET /rinex-data/rinex.json` → array:
-  ```json
-  [
-    { "year":2026, "month":8, "day":30, "station":"UYAG",
-      "filename":"uyag2420.rnx.zip", "size":"1.2 MB",
-      "path":"UYAG/2026/08/30/uyag2420.rnx.zip" }
-  ]
-  ```
-- `GET /rinex-data/raw/<path>` → el archivo, como descarga (`Content-Disposition: attachment`).
-
-### Datos del entorno (confirmados)
+## 0. Situación (confirmada)
 
 | Dato | Valor |
 |---|---|
-| FTP host | `192.168.100.96` (IP de LAN → la VM debe estar en la red del IGM) |
-| FTP usuario | `geodesia` (clave: la pone IT en el archivo de config) |
-| Ruta FTP | `/home/igmrou/ftp/regna/<EST>/<AAAA>/<MM>/<DD>/{Diario,Hora}/` |
-| Nombre archivo | ej. `uyag2420.rnx.zip` — el año/fecha salen de la **carpeta**, no del nombre |
-| Histórico | >100 GB (por eso NO se replica) |
-| A publicar | Solo `Diario/` por ahora; `Hora/` después |
-| Acceso | Público, sin login |
+| Servidor | Ubuntu 24.04, IP interna `192.168.100.134`, usuario `administrador` con `sudo` |
+| Web root | `/var/www/sirgas-uy/html` (sin servidor web instalado todavía) |
+| Python | 3.12.3, `venv` disponible |
+| FTP datos | `192.168.100.96`, **anónimo**, estaciones en `/regna/<EST>/<AAAA>/<MM>/<DD>/Diario/` |
+| Nombre archivo | ej. `uyag2420.rnx.zip` (fecha se toma de la carpeta, no del nombre) |
+| Exposición | El sitio debe ser **público** → falta que IT dé dominio + NAT 443 + TLS |
+
+Se puede instalar y probar **ahora** por la IP interna; el HTTPS se agrega
+cuando IT publique el dominio.
+
+### Contrato con el frontend (ya implementado, no tocar)
+
+- `GET /rinex-data/rinex.json` → `[{year,month,day,station,filename,size,path}, …]`
+- `GET /rinex-data/raw/<EST>/<AAAA>/<MM>/<DD>/<archivo>` → el archivo, como descarga.
 
 ---
 
-## 2. Lo que hay que pedirle a IT del IGM
+## 1. Preparar el build del sitio (en tu PC)
 
-1. **VM Windows Server** en la LAN, con:
-   - salida hacia `192.168.100.96:21` (y rango de puertos pasivos del FTP),
-   - Python 3.12+, IIS con módulos **URL Rewrite** + **Application Request Routing (ARR)**.
-2. **DNS público** `rinex.igm.gub.uy` → IP pública de la VM.
-3. **NAT / firewall**: puerto **443** de internet hacia la VM.
-4. **Certificado TLS** para ese dominio (o permitir `win-acme` / Let's Encrypt).
-5. La **clave** del usuario `geodesia` del FTP.
-6. Confirmar el **rango de puertos pasivos** que usa el FTP (para el firewall).
+Subiste el proyecto entero por WinSCP; el servidor web solo sirve el **build**.
+
+```bash
+cd app
+npm ci
+npm run build          # genera app/dist/
+```
+
+Subí por WinSCP **el contenido de `app/dist/`** (no la carpeta, su contenido)
+a `/var/www/sirgas-uy/html/`. Debe quedar `…/html/index.html`, `…/html/assets/`, etc.
+
+> El código de la API (`api/`) subilo a la home del usuario, ej.
+> `/home/administrador/WEB/api/` — desde ahí lo instala el script.
 
 ---
 
-## 3. Instalación en la VM
+## 2. Instalar la API (en el servidor, por la terminal de WinSCP)
 
-```
-C:\rinex-api\
-  ├─ app\           código (main.py, indexer.py, config.py)
-  ├─ venv\          entorno virtual de Python
-  ├─ data\
-  │   └─ rinex.json manifiesto generado
-  ├─ cache\         archivos traídos del FTP (LRU, tope de tamaño)
-  ├─ logs\
-  └─ .env           configuración (FTP, clave, CORS) — permisos restringidos
+```bash
+cd ~/WEB           # donde quedó el repo subido
+sudo bash api/deploy/install.sh
 ```
 
-```powershell
-# Copiar la carpeta api\ del repo a C:\rinex-api\
-cd C:\rinex-api
-py -3.12 -m venv venv
-.\venv\Scripts\pip install -r requirements.txt
-copy .env.example .env
-notepad .env    # completar FTP_PASS y CACHE_MAX_GB
+El script ([`api/deploy/install.sh`](../api/deploy/install.sh)):
+
+- instala `python3-venv` y `rsync`
+- crea el usuario de servicio `rinex`
+- copia el código a `/opt/rinex-api/`, crea el venv e instala dependencias
+- crea `/opt/rinex-api/.env` desde el ejemplo (revisalo)
+- instala y arranca los servicios `rinex-api.service` y `rinex-indexer.timer`
+
+Verificá:
+
+```bash
+systemctl status rinex-api.service        # debe decir active (running)
+curl -s http://127.0.0.1:8000/healthz     # {"manifest": false, ...} al principio
 ```
 
-Plantilla de configuración: [`api/.env.example`](../api/.env.example).
+### Ajustar la config si hace falta
 
-> Restringir el `.env` a la cuenta de servicio:
-> `icacls C:\rinex-api\.env /inheritance:r /grant:r "NT SERVICE\rinex-api:R" "Administrators:F"`
+```bash
+sudo nano /opt/rinex-api/.env
+```
+
+Valores por defecto (ya deberían servir): `FTP_HOST=192.168.100.96`,
+`FTP_USER=anonymous`, `FTP_ROOT=/regna`, `FTP_SUBDIR=Diario`, `CACHE_MAX_GB=8`.
+Después de editar: `sudo systemctl restart rinex-api`.
 
 ---
 
-## 4. Código
+## 3. Primera indexación
 
-El código vive en la carpeta [`api/`](../api/) del repo, listo para copiar a
-`C:\rinex-api\` en la VM:
+Recorre el FTP y genera `/var/lib/rinex-api/data/rinex.json`. Con el histórico
+grande puede tardar **varios minutos** (miles de carpetas).
 
-| Archivo | Rol |
+```bash
+sudo -u rinex /opt/rinex-api/venv/bin/python -m app.indexer
+```
+
+Salida esperada: `NNNN archivos indexados en Ns -> /var/lib/rinex-api/data/rinex.json`
+
+```bash
+curl -s http://127.0.0.1:8000/rinex-data/rinex.json | head -c 400
+```
+
+De ahí en más, el `rinex-indexer.timer` lo regenera solo cada 3 h. Ver:
+`systemctl list-timers rinex-indexer`.
+
+---
+
+## 4. Instalar y configurar Nginx
+
+```bash
+sudo apt install -y nginx
+sudo cp ~/WEB/api/deploy/nginx-sirgas-uy.conf /etc/nginx/sites-available/sirgas-uy
+sudo ln -s /etc/nginx/sites-available/sirgas-uy /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Config: [`api/deploy/nginx-sirgas-uy.conf`](../api/deploy/nginx-sirgas-uy.conf)
+— sirve `/var/www/sirgas-uy/html`, hace de reverse proxy de `/rinex-data/` a la
+API, y agrega las cabeceras de seguridad.
+
+Probá desde una PC en la red del IGM: `http://192.168.100.134/`
+
+---
+
+## 5. HTTPS (cuando IT dé el dominio)
+
+```bash
+# 1. IT: DNS del dominio -> 192.168.100.134 (o su NAT/proxy) + puerto 443 abierto
+# 2. En el server:
+sudo sed -i 's/server_name _;/server_name sirgas.igm.gub.uy;/' /etc/nginx/sites-available/sirgas-uy
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d sirgas.igm.gub.uy
+# 3. Descomentar la línea Strict-Transport-Security en el .conf y recargar nginx
+```
+
+Si el sitio queda detrás del proxy de IT (no expuesto directo), el certificado
+lo maneja ese proxy y este paso se salta.
+
+---
+
+## 6. Pruebas
+
+```bash
+# índice
+curl -s http://192.168.100.134/rinex-data/rinex.json | python3 -m json.tool | head
+
+# descarga real (usar un path que aparezca en el índice)
+curl -OJ http://192.168.100.134/rinex-data/raw/UYAG/2026/08/30/uyag2420.rnx.zip
+
+# segunda vez: sale del caché (más rápido)
+# ruta inválida -> 400 / 404
+curl -s -o /dev/null -w "%{http_code}\n" "http://192.168.100.134/rinex-data/raw/../etc/passwd"
+
+# no lista directorios
+curl -s -o /dev/null -w "%{http_code}\n" http://192.168.100.134/rinex-data/raw/
+```
+
+En el navegador: `http://192.168.100.134/descarga-rinex` — filtros y botón Descargar.
+
+---
+
+## 7. Operación
+
+| Acción | Comando |
 |---|---|
-| [`api/app/config.py`](../api/app/config.py) | Lee `api/.env` |
-| [`api/app/ftputil.py`](../api/app/ftputil.py) | Conexión FTP + `listdir` (MLSD con fallback a NLST) |
-| [`api/app/indexer.py`](../api/app/indexer.py) | Recorre el FTP → `data/rinex.json` |
-| [`api/app/main.py`](../api/app/main.py) | FastAPI: `/rinex-data/rinex.json`, `/rinex-data/raw/<path>`, `/healthz` |
-| [`api/iis/web.config`](../api/iis/web.config) | Reverse proxy IIS + fallback SPA |
-| [`api/scripts/install-service.ps1`](../api/scripts/install-service.ps1) | Registra el servicio con NSSM |
-| [`api/run-indexer.cmd`](../api/run-indexer.cmd) | Lo llama la tarea programada |
-| [`api/.env.example`](../api/.env.example) | Plantilla de configuración |
-
-Pasos de instalación resumidos en [`api/README.md`](../api/README.md).
-
-**Puntos de diseño:**
-
-- La API solo entrega archivos **presentes en el índice** (`data/rinex.json`);
-  nunca abre rutas arbitrarias del FTP. Más `valid_path()` contra `..` y
-  caracteres raros.
-- Patrón *traer al caché y después servir*: `FileResponse` de Starlette soporta
-  **HTTP Range**, así que "reanudar descarga" sale gratis desde el caché.
-- El caché (`cache/`) se limpia por antigüedad de acceso (LRU) cuando supera
-  `CACHE_MAX_GB`.
-- El año/mes/día de cada archivo salen de la **ruta de carpetas**
-  (`UYAG/2026/08/30/`), no del nombre `uyag2420.rnx.zip`.
+| Ver estado API | `systemctl status rinex-api` |
+| Logs API | `journalctl -u rinex-api -f` |
+| Logs indexador | `journalctl -u rinex-indexer -f` |
+| Forzar reindexado | `sudo systemctl start rinex-indexer` |
+| Reiniciar API | `sudo systemctl restart rinex-api` |
+| Actualizar código | volver a subir `api/` y correr `sudo bash api/deploy/install.sh` |
+| Ver caché | `du -sh /var/lib/rinex-api/cache` |
 
 ---
 
+## 8. Pendientes de IT
 
-## 5. Correr la API como servicio de Windows
-
-Con **NSSM** (<https://nssm.cc>):
-
-```powershell
-nssm install rinex-api "C:\rinex-api\venv\Scripts\python.exe" ^
-  "-m uvicorn app.main:app --host 127.0.0.1 --port 8000"
-nssm set rinex-api AppDirectory C:\rinex-api
-nssm set rinex-api AppStdout C:\rinex-api\logs\api.log
-nssm set rinex-api AppStderr C:\rinex-api\logs\api.log
-nssm set rinex-api Start SERVICE_AUTO_START
-nssm start rinex-api
-```
-
-Probar local: `curl http://127.0.0.1:8000/healthz`
+1. **Dominio** público (ej. `sirgas.igm.gub.uy` o `rinex.igm.gub.uy`) → `192.168.100.134`.
+2. **NAT / publicación**: puerto 443 de internet hacia el servidor (o detrás del proxy del IGM).
+3. **Certificado TLS** (o permitir `certbot`).
+4. Confirmar que **todo el histórico** del FTP usa la estructura `EST/AAAA/MM/DD/Diario/`
+   (estaciones o años viejos podrían diferir).
+5. Definir `CACHE_MAX_GB` según el disco del servidor (`df -h /`).
 
 ---
 
-## 6. Tarea programada — índice cada 3 h
+## 9. Notas de diseño
 
-`C:\rinex-api\run-indexer.cmd`:
-
-```bat
-@echo off
-cd /d C:\rinex-api
-venv\Scripts\python.exe -m app.indexer >> logs\indexer.log 2>&1
-```
-
-Programador de tareas:
-- Desencadenador: al inicio + repetir cada **3 horas**.
-- Acción: `C:\rinex-api\run-indexer.cmd`.
-- "Ejecutar aunque el usuario no haya iniciado sesión".
-- Detener si dura más de 2 h.
-- **Primera corrida a mano** (`run-indexer.cmd`) — con >100 GB y miles de
-  carpetas puede tardar varios minutos; verificá que `data\rinex.json` quede bien.
-
----
-
-## 7. IIS como reverse proxy + TLS
-
-1. Instalar **URL Rewrite** y **ARR**. En ARR: *Server Proxy Settings* →
-   *Enable proxy*.
-2. Sitio en IIS con la carpeta del build de React como raíz física
-   (`C:\inetpub\rinex\`), binding `https` para `rinex.igm.gub.uy` con el
-   certificado.
-3. `web.config` en la raíz del sitio:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-  <system.webServer>
-    <rewrite>
-      <rules>
-        <!-- /rinex-data/* va a la API -->
-        <rule name="api-proxy" stopProcessing="true">
-          <match url="^rinex-data/(.*)" />
-          <action type="Rewrite" url="http://127.0.0.1:8000/rinex-data/{R:1}" />
-        </rule>
-        <!-- fallback SPA para el resto -->
-        <rule name="spa" stopProcessing="true">
-          <match url=".*" />
-          <conditions logicalGrouping="MatchAll">
-            <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-            <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-          </conditions>
-          <action type="Rewrite" url="/index.html" />
-        </rule>
-      </rules>
-    </rewrite>
-    <security>
-      <requestFiltering><requestLimits maxAllowedContentLength="4294967295" /></requestFiltering>
-    </security>
-  </system.webServer>
-</configuration>
-```
-
-Como sitio y API quedan bajo el mismo dominio, **no hace falta CORS**
-(dejar `ALLOW_ORIGIN=` vacío).
-
-> Si el sitio siguiera en Vercel: poné `ALLOW_ORIGIN=https://tu-dominio.vercel.app`
-> y en [`DescargaRinex.jsx`](../app/src/pages/DescargaRinex.jsx) cambiá
-> `MANIFEST_URL`/`DOWNLOAD_BASE` a `https://rinex.igm.gub.uy/rinex-data/...`.
-
----
-
-## 8. Frontend
-
-La página **no requiere cambios**: `MANIFEST_URL = '/rinex-data/rinex.json'` y
-`DOWNLOAD_BASE = '/rinex-data/raw'` ya coinciden con la API detrás del proxy.
-
-Cuando se agreguen los **horarios**: en `indexer.py` recorrer también `Hora/`,
-agregar `"tipo": "diario" | "hora"` a cada item y un filtro en la página.
-
----
-
-## 9. Seguridad
-
-- **Path traversal:** `valid_path()` + verificación contra el manifiesto →
-  la API solo entrega archivos que ya están indexados, no rutas arbitrarias del FTP.
-- **Clave FTP:** solo en `.env` con ACL restringida a la cuenta de servicio.
-- **FTP en claro:** el tráfico VM↔`192.168.100.96` es LAN; si se puede, pedir
-  FTPS al área que administra `igmrou`.
-- **Rate limiting / tamaño de descarga:** configurable en IIS (ARR) o agregando
-  `slowapi` a FastAPI si aparece abuso.
-- **Solo GET** expuesto; `docs_url` de FastAPI deshabilitado.
-
----
-
-## 10. Pruebas (checklist)
-
-- [ ] `python -m app.indexer` genera `data\rinex.json` con fechas/estaciones correctas
-- [ ] `curl http://127.0.0.1:8000/rinex-data/rinex.json` devuelve el JSON
-- [ ] `curl -OJ http://127.0.0.1:8000/rinex-data/raw/UYAG/2026/08/30/uyag2420.rnx.zip` descarga el archivo
-- [ ] Segundo pedido del mismo archivo sale del caché (más rápido, log lo indica)
-- [ ] Ruta con `..` o no indexada → 400 / 404
-- [ ] `https://rinex.igm.gub.uy/rinex-data/rinex.json` funciona desde afuera
-- [ ] La página de descarga lista, filtra y el botón Descargar baja el archivo
-- [ ] `cache\` no supera `CACHE_MAX_GB` tras varias descargas
-- [ ] Tarea programada corre sola y actualiza el `mtime` de `rinex.json` (ver `/healthz`)
-
----
-
-## 11. Pendientes de IT / decisiones
-
-1. Clave del usuario `geodesia` del FTP + rango de puertos pasivos.
-2. VM Windows con Python 3.12 + IIS (URL Rewrite + ARR).
-3. DNS `rinex.igm.gub.uy` + NAT 443 + certificado TLS.
-4. Confirmar que todas las estaciones/años usan la misma estructura de carpetas
-   `EST/AAAA/MM/DD/Diario/` (histórico viejo podría diferir).
-5. Cuenta de servicio para el servicio NSSM y la tarea programada.
-6. Definir `CACHE_MAX_GB` según disco de la VM.
-```
+- El indexador re-recorre todo el FTP cada 3 h. Si resulta pesado para el FTP,
+  subir el intervalo del timer a 6 h o implementar indexado incremental (solo
+  días nuevos). Empezar simple.
+- La API solo entrega archivos que están en `rinex.json` → no expone rutas
+  arbitrarias del FTP. Más validación de path contra `..`.
+- Servir desde el caché da soporte de **reanudar descarga** (HTTP Range) gratis.
+- Seguridad detallada en [`seguridad.md`](seguridad.md).

@@ -2,9 +2,9 @@
 
 API de descarga de archivos RINEX de la red REGNA-ROU. Modelo **proxy**: no
 replica el histórico; ante cada pedido trae el archivo del FTP interno
-`192.168.100.96` y lo sirve, con un caché local acotado.
+`192.168.100.96` (login anónimo) y lo sirve, con un caché local acotado.
 
-Diseño completo y pasos de infraestructura: [`../docs/plan-descarga-rinex.md`](../docs/plan-descarga-rinex.md).
+**Runbook de despliegue completo:** [`../docs/plan-descarga-rinex.md`](../docs/plan-descarga-rinex.md).
 
 ## Estructura
 
@@ -12,12 +12,15 @@ Diseño completo y pasos de infraestructura: [`../docs/plan-descarga-rinex.md`](
 api/
   app/
     config.py     configuración desde .env
-    ftputil.py    conexión y listado FTP
+    ftputil.py    conexión y listado FTP (anónimo, MLSD con fallback)
     indexer.py    recorre el FTP y escribe data/rinex.json
     main.py       FastAPI: /rinex-data/rinex.json y /rinex-data/raw/<path>
-  iis/web.config  reverse proxy IIS (URL Rewrite + ARR) + fallback SPA
-  scripts/install-service.ps1   registra la API como servicio con NSSM
-  run-indexer.cmd               lo llama la tarea programada cada 3 h
+  deploy/
+    install.sh              instala/actualiza todo en Ubuntu (systemd + venv)
+    rinex-api.service       servicio de la API (uvicorn)
+    rinex-indexer.service   job del indexador (oneshot)
+    rinex-indexer.timer     lo dispara cada 3 h
+    nginx-sirgas-uy.conf    vhost: sitio estático + reverse proxy a la API
   requirements.txt
   .env.example
 ```
@@ -26,43 +29,34 @@ api/
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET | `/rinex-data/rinex.json` | Índice de archivos disponibles (cacheado, lo genera `indexer.py`). |
-| GET | `/rinex-data/raw/<EST>/<AAAA>/<MM>/<DD>/<archivo>` | Descarga el archivo. La ruta debe existir en el índice. |
-| GET | `/healthz` | Estado del índice (existe / antigüedad en minutos). |
+| GET | `/rinex-data/rinex.json` | Índice de archivos disponibles (lo genera `indexer.py`). |
+| GET | `/rinex-data/raw/<EST>/<AAAA>/<MM>/<DD>/<archivo>` | Descarga el archivo. Debe existir en el índice. |
+| GET | `/healthz` | Estado del índice. |
 
-## Puesta en marcha (VM Windows)
+## Instalación rápida (Ubuntu)
 
-```powershell
-# 1. Copiar la carpeta api\ a C:\rinex-api\  (o clonar el repo y usar esa subcarpeta)
-cd C:\rinex-api
-py -3.12 -m venv venv
-.\venv\Scripts\pip install -r requirements.txt
-
-# 2. Configurar
-copy .env.example .env
-notepad .env                     # completar FTP_PASS, CACHE_MAX_GB, etc.
-icacls .env /inheritance:r /grant:r "Administrators:F" "%USERNAME%:R"
-
-# 3. Primera generación del índice (puede tardar varios minutos)
-.\venv\Scripts\python.exe -m app.indexer
-
-# 4. Probar la API a mano
-.\venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
-#   en otra consola:
-curl http://127.0.0.1:8000/healthz
-curl -OJ http://127.0.0.1:8000/rinex-data/raw/UYAG/2026/08/30/uyag2420.rnx.zip
-
-# 5. Servicio permanente
-.\scripts\install-service.ps1    # como administrador (necesita nssm en el PATH)
-
-# 6. Tarea programada -> run-indexer.cmd cada 3 h
-#    (ver docs/plan-descarga-rinex.md, sección 6)
-
-# 7. IIS: copiar iis\web.config a la raíz del sitio y ajustar bindings/TLS
+```bash
+# en el servidor, con el repo subido en ~/WEB
+sudo bash api/deploy/install.sh
+sudo -u rinex /opt/rinex-api/venv/bin/python -m app.indexer   # primera indexación
+curl -s http://127.0.0.1:8000/healthz
 ```
 
-## Desarrollo local (sin FTP real)
+Después: instalar Nginx con `deploy/nginx-sirgas-uy.conf` (ver runbook, sección 4).
 
-`indexer.py` necesita el FTP. Para probar solo la API podés crear a mano un
-`data/rinex.json` con unos pocos registros y archivos correspondientes en
-`cache/<path>`; la API los servirá desde el caché sin tocar el FTP.
+## Actualizar
+
+Volvé a subir `api/` y corré `sudo bash api/deploy/install.sh` de nuevo
+(hace `rsync` del código y reinicia el servicio; conserva `.env`).
+
+## Desarrollo local
+
+```bash
+python -m venv venv && venv/bin/pip install -r requirements.txt
+cp .env.example .env            # ajustar DATA_DIR/CACHE_DIR a rutas locales
+venv/bin/python -m app.indexer  # necesita alcance al FTP
+venv/bin/uvicorn app.main:app --port 8000
+```
+
+Sin FTP: crear a mano `data/rinex.json` y archivos en `cache/<path>`; la API
+los sirve del caché sin tocar el FTP.
