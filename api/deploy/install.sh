@@ -42,7 +42,8 @@ cp "$APP_DIR/deploy/rinex-api.service"      /etc/systemd/system/
 cp "$APP_DIR/deploy/rinex-indexer.service"  /etc/systemd/system/
 cp "$APP_DIR/deploy/rinex-indexer.timer"    /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable --now rinex-api.service
+systemctl enable rinex-api.service
+systemctl restart rinex-api.service     # 'enable --now' no reinicia si ya estaba corriendo
 systemctl enable --now rinex-indexer.timer
 
 echo
