@@ -1,7 +1,7 @@
 """Recorre el FTP interno y reescribe data/rinex.json.
 
-Lo ejecuta la tarea programada de Windows cada 3 h (ver api/run-indexer.cmd).
-Primera corrida a mano recomendada: puede tardar varios minutos.
+Lo dispara rinex-indexer.timer cada 3 h. Primera corrida a mano recomendada:
+puede tardar varios minutos.
 
     python -m app.indexer
 """
@@ -33,6 +33,8 @@ def build() -> int:
         for est, est_dir, _ in listdir(ftp, config.FTP_ROOT):
             if not est_dir:
                 continue
+            if est.upper() in config.EXCLUDE_STATIONS:
+                continue  # estaciones internas / de prueba, no se publican
             est_path = f"{config.FTP_ROOT}/{est}"
             for yr, yr_dir, _ in listdir(ftp, est_path):
                 if not (yr_dir and yr.isdigit() and len(yr) == 4):

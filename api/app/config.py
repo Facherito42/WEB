@@ -13,6 +13,13 @@ FTP_PASS = os.environ.get("FTP_PASS", "rinex@igm.gub.uy")
 FTP_ROOT = os.environ.get("FTP_ROOT", "/regna").rstrip("/")
 FTP_SUBDIR = os.environ.get("FTP_SUBDIR", "Diario")
 
+# Estaciones que NO se publican (internas / de prueba). Coma-separado, en el .env.
+EXCLUDE_STATIONS = {
+    s.strip().upper()
+    for s in os.environ.get("EXCLUDE_STATIONS", "IM03,IM13,IM17,IM35,SNM1").split(",")
+    if s.strip()
+}
+
 # --- Rutas locales ---
 DATA_DIR = Path(os.environ.get("DATA_DIR", "/var/lib/rinex-api/data"))
 CACHE_DIR = Path(os.environ.get("CACHE_DIR", "/var/lib/rinex-api/cache"))
