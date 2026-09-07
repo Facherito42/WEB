@@ -1,83 +1,114 @@
-"""Recorre el FTP interno y reescribe data/rinex.json.
+"""Recorre las fuentes (FTP + SFTP histórico) y reescribe el índice partido por año.
 
-Lo dispara rinex-indexer.timer cada 3 h. Primera corrida a mano recomendada:
-puede tardar varios minutos.
+    DATA_DIR/index.json     -> { "years": [...], "updated": "...", "sources": {...} }
+    DATA_DIR/y/<AAAA>.json   -> [ {year,month,day,station,filename,size,path,src}, ... ]
 
-    python -m app.indexer
+Modos:
+    python -m app.indexer          incremental: re-scan completo del FTP 'regna' +
+                                   solo el año actual del SFTP histórico. Rápido.
+                                   Lo corre rinex-indexer.timer cada 3 h.
+    python -m app.indexer --full   re-scan completo de todo (incluido el histórico
+                                   2018+). Tarda; correr a mano la primera vez o
+                                   cuando cambie el histórico.
 """
-import ftplib
 import json
 import sys
 import time
+from datetime import date, datetime, timezone
 
-from . import config
-from .ftputil import ftp_conn, listdir
-
-_SKIP_EXT = (".md5", ".sha1", ".txt", ".log")
+from . import config, sources
 
 
-def human(n: float) -> str:
-    if n < 1024:
-        return f"{int(n)} B"
-    for unit in ("KB", "MB", "GB"):
-        n /= 1024
-        if n < 1024 or unit == "GB":
-            return f"{n:.1f} {unit}"
-    return f"{n:.1f} GB"
+def _atomic_write(path, text: str):
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    tmp.replace(path)
 
 
-def build() -> int:
-    items = []
+def build(full: bool = False) -> dict:
     t0 = time.time()
-    with ftp_conn() as ftp:
-        for est, est_dir, _ in listdir(ftp, config.FTP_ROOT):
-            if not est_dir:
-                continue
-            if est.upper() in config.EXCLUDE_STATIONS:
-                continue  # estaciones internas / de prueba, no se publican
-            est_path = f"{config.FTP_ROOT}/{est}"
-            for yr, yr_dir, _ in listdir(ftp, est_path):
-                if not (yr_dir and yr.isdigit() and len(yr) == 4):
-                    continue
-                for mo, mo_dir, _ in listdir(ftp, f"{est_path}/{yr}"):
-                    if not (mo_dir and mo.isdigit()):
-                        continue
-                    for dy, dy_dir, _ in listdir(ftp, f"{est_path}/{yr}/{mo}"):
-                        if not (dy_dir and dy.isdigit()):
-                            continue
-                        sub = f"{est_path}/{yr}/{mo}/{dy}/{config.FTP_SUBDIR}"
-                        try:
-                            files = listdir(ftp, sub)
-                        except ftplib.error_perm:
-                            continue
-                        for fn, is_dir, size in files:
-                            if is_dir or fn.lower().endswith(_SKIP_EXT):
-                                continue
-                            items.append(
-                                {
-                                    "year": int(yr),
-                                    "month": int(mo),
-                                    "day": int(dy),
-                                    "station": est.upper(),
-                                    "filename": fn,
-                                    "size": human(size),
-                                    "path": f"{est.upper()}/{yr}/{mo.zfill(2)}/{dy.zfill(2)}/{fn}",
-                                }
-                            )
+    cur_year = date.today().year
 
-    tmp = config.MANIFEST.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(items, ensure_ascii=False), encoding="utf-8")
-    tmp.replace(config.MANIFEST)
-    print(
-        f"{len(items)} archivos indexados en {time.time() - t0:.0f}s "
-        f"-> {config.MANIFEST}"
+    # 1. cargar el índice existente en memoria: by_year[año] = {path: entry}
+    by_year: dict[int, dict[str, dict]] = {}
+    for f in config.YEAR_DIR.glob("*.json"):
+        try:
+            yr = int(f.stem)
+        except ValueError:
+            continue
+        try:
+            by_year[yr] = {e["path"]: e for e in json.loads(f.read_text("utf-8"))}
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    # primera corrida (sin índice previo) -> forzar full
+    if not by_year:
+        full = True
+
+    # 2. qué años re-scanea el histórico
+    hist_years = None if full else {cur_year, cur_year - 1}
+
+    # 3. limpiar entradas de las fuentes que vamos a re-scanear
+    for yr, entries in by_year.items():
+        for path in list(entries):
+            src = entries[path].get("src")
+            if src == "regna":
+                del entries[path]
+            elif src == "hist" and (full or (hist_years and yr in hist_years)):
+                del entries[path]
+
+    # 4. re-scan
+    stats: dict[str, int] = {}
+    for source in sources.all_sources():
+        yrs = None if source.name == "regna" else hist_years
+        n = 0
+        for e in source.entries(years=yrs):
+            slot = by_year.setdefault(e["year"], {})
+            prev = slot.get(e["path"])
+            # 'regna' (datos vivos) gana sobre 'hist' para la misma fecha/archivo
+            if prev and prev.get("src") == "regna" and e["src"] == "hist":
+                continue
+            slot[e["path"]] = e
+            n += 1
+        stats[source.name] = n
+
+    # 5. escribir archivos por año + index.json
+    years_written = []
+    total = 0
+    for yr in sorted(by_year):
+        entries = list(by_year[yr].values())
+        year_file = config.YEAR_DIR / f"{yr}.json"
+        if not entries:
+            year_file.unlink(missing_ok=True)
+            continue
+        entries.sort(key=lambda e: (e["month"], e["day"], e["station"], e["filename"]))
+        _atomic_write(year_file, json.dumps(entries, ensure_ascii=False))
+        years_written.append(yr)
+        total += len(entries)
+
+    _atomic_write(
+        config.INDEX_FILE,
+        json.dumps(
+            {
+                "years": years_written,
+                "updated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "sources": stats,
+            },
+            ensure_ascii=False,
+        ),
     )
-    return len(items)
+
+    dt = time.time() - t0
+    print(
+        f"{'FULL' if full else 'incremental'}: {total} archivos en "
+        f"{len(years_written)} años ({dt:.0f}s). Fuentes: {stats}"
+    )
+    return {"total": total, "years": years_written, "sources": stats}
 
 
 if __name__ == "__main__":
     try:
-        build()
+        build(full="--full" in sys.argv)
     except Exception as exc:  # noqa: BLE001
         print("ERROR:", exc, file=sys.stderr)
         sys.exit(1)

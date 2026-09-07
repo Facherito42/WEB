@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import PageBanner from '../components/PageBanner'
 
-// Files are synced from a manifest generated server-side by
-// sync-rinex.sh + build_manifest.py (outside this repo). Adjust these two
-// paths to wherever the web server publishes them.
-const MANIFEST_URL = '/rinex-data/rinex.json'
+// Índice partido por año, generado server-side por la API RINEX:
+//   /rinex-data/index.json   -> { years: [...] }
+//   /rinex-data/y/<AAAA>.json -> archivos de ese año
+//   /rinex-data/raw/<path>    -> descarga
+const INDEX_URL = '/rinex-data/index.json'
+const yearUrl = (y) => `/rinex-data/y/${y}.json`
 const DOWNLOAD_BASE = '/rinex-data/raw'
 
 const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -14,47 +16,85 @@ function uniqueSorted(arr) {
 }
 
 function matches(file, f) {
-  return (!f.year || file.year === f.year) && (!f.month || file.month === f.month) && (!f.day || file.day === f.day) && (!f.station || file.station === f.station)
+  return (!f.month || file.month === f.month) && (!f.day || file.day === f.day) && (!f.station || file.station === f.station)
 }
 
 export default function DescargaRinex() {
-  const [rinexFiles, setRinexFiles] = useState([])
-  const [statusNote, setStatusNote] = useState('')
+  const [years, setYears] = useState([])
+  const [year, setYear] = useState('')
+  const [yearData, setYearData] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filters, setFilters] = useState({ year: '', month: '', day: '', station: '' })
+  const [loadingYear, setLoadingYear] = useState(false)
+  const [statusNote, setStatusNote] = useState('')
+  const [filters, setFilters] = useState({ month: '', day: '', station: '' })
+  const cache = useRef({})
 
+  // 1. Cargar el índice de años
   useEffect(() => {
     let cancelled = false
-    async function loadManifest() {
+    async function loadIndex() {
       setLoading(true)
       try {
-        const resp = await fetch(MANIFEST_URL, { cache: 'no-store' })
+        const resp = await fetch(INDEX_URL, { cache: 'no-store' })
         if (!resp.ok) throw new Error('HTTP ' + resp.status)
         const data = await resp.json()
         if (cancelled) return
-        if (!Array.isArray(data) || data.length === 0) {
+        const ys = Array.isArray(data.years) ? [...data.years].sort((a, b) => b - a) : []
+        if (ys.length === 0) {
           setStatusNote('No se encontraron archivos en este momento. Puede que el último sincronismo con el servidor RINEX no haya generado datos todavía.')
-          setRinexFiles([])
+          setYears([])
         } else {
-          setRinexFiles(data)
+          setYears(ys)
+          setYear(String(ys[0]))
         }
       } catch (err) {
         if (cancelled) return
-        setRinexFiles([])
-        setStatusNote('No se pudo cargar el listado de archivos (' + err.message + '). Intentá nuevamente en unos minutos o contactá al equipo técnico.')
+        setYears([])
+        setStatusNote('No se pudo cargar el listado de años (' + err.message + '). Intentá nuevamente en unos minutos o contactá al equipo técnico.')
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
-    loadManifest()
+    loadIndex()
     return () => {
       cancelled = true
     }
   }, [])
 
+  // 2. Cargar los archivos del año seleccionado (con caché en memoria)
+  useEffect(() => {
+    if (!year) return
+    let cancelled = false
+    async function loadYear() {
+      if (cache.current[year]) {
+        setYearData(cache.current[year])
+        return
+      }
+      setLoadingYear(true)
+      try {
+        const resp = await fetch(yearUrl(year), { cache: 'no-store' })
+        if (!resp.ok) throw new Error('HTTP ' + resp.status)
+        const data = await resp.json()
+        if (cancelled) return
+        cache.current[year] = data
+        setYearData(data)
+        setStatusNote('')
+      } catch (err) {
+        if (cancelled) return
+        setYearData([])
+        setStatusNote('No se pudieron cargar los archivos de ' + year + ' (' + err.message + ').')
+      } finally {
+        if (!cancelled) setLoadingYear(false)
+      }
+    }
+    loadYear()
+    return () => {
+      cancelled = true
+    }
+  }, [year])
+
   const activeFilters = useMemo(
     () => ({
-      year: filters.year ? parseInt(filters.year) : null,
       month: filters.month ? parseInt(filters.month) : null,
       day: filters.day ? parseInt(filters.day) : null,
       station: filters.station || null,
@@ -62,22 +102,25 @@ export default function DescargaRinex() {
     [filters],
   )
 
-  const years = useMemo(() => uniqueSorted(rinexFiles.filter((x) => matches(x, { ...activeFilters, year: null })).map((x) => x.year)).reverse(), [rinexFiles, activeFilters])
-  const months = useMemo(() => uniqueSorted(rinexFiles.filter((x) => matches(x, { ...activeFilters, month: null })).map((x) => x.month)), [rinexFiles, activeFilters])
-  const days = useMemo(() => uniqueSorted(rinexFiles.filter((x) => matches(x, { ...activeFilters, day: null })).map((x) => x.day)), [rinexFiles, activeFilters])
-  const stations = useMemo(() => [...new Set(rinexFiles.filter((x) => matches(x, { ...activeFilters, station: null })).map((x) => x.station))].sort(), [rinexFiles, activeFilters])
+  const months = useMemo(() => uniqueSorted(yearData.filter((x) => matches(x, { ...activeFilters, month: null })).map((x) => x.month)), [yearData, activeFilters])
+  const days = useMemo(() => uniqueSorted(yearData.filter((x) => matches(x, { ...activeFilters, day: null })).map((x) => x.day)), [yearData, activeFilters])
+  const stations = useMemo(() => [...new Set(yearData.filter((x) => matches(x, { ...activeFilters, station: null })).map((x) => x.station))].sort(), [yearData, activeFilters])
 
   const matched = useMemo(() => {
-    const list = rinexFiles.filter((x) => matches(x, activeFilters))
-    list.sort((a, b) => b.year - a.year || b.month - a.month || b.day - a.day || a.station.localeCompare(b.station))
+    const list = yearData.filter((x) => matches(x, activeFilters))
+    list.sort((a, b) => b.month - a.month || b.day - a.day || a.station.localeCompare(b.station))
     return list
-  }, [rinexFiles, activeFilters])
+  }, [yearData, activeFilters])
 
-  const pathParts = []
-  if (activeFilters.year) pathParts.push(activeFilters.year)
+  const pathParts = [year]
   if (activeFilters.month) pathParts.push(monthNames[activeFilters.month - 1])
   if (activeFilters.day) pathParts.push(String(activeFilters.day).padStart(2, '0'))
   if (activeFilters.station) pathParts.push(activeFilters.station)
+
+  function onYearChange(e) {
+    setYear(e.target.value)
+    setFilters({ month: '', day: '', station: '' })
+  }
 
   function onFilterChange(field) {
     return (e) => setFilters((f) => ({ ...f, [field]: e.target.value }))
@@ -88,13 +131,12 @@ export default function DescargaRinex() {
       <PageBanner title="Descarga de Archivos RINEX" crumbs={['Servicios', 'Descarga de archivos RINEX']} />
       <section className="content-page">
         <div className="rinex-wrap">
-          <p>Descargá los archivos RINEX de las estaciones de la red REGNA-ROU, organizados por año, mes, día y estación. Seleccioná los filtros para ubicar el archivo que necesitás.</p>
+          <p>Descargá los archivos RINEX de las estaciones de la red REGNA-ROU, organizados por año, mes, día y estación. Elegí el año y luego afiná con los demás filtros.</p>
 
           <div className="rinex-filters">
             <div className="field">
               <label htmlFor="f-year">Año</label>
-              <select id="f-year" value={filters.year} onChange={onFilterChange('year')}>
-                <option value="">Todos</option>
+              <select id="f-year" value={year} onChange={onYearChange} disabled={loading || years.length === 0}>
                 {years.map((y) => (
                   <option key={y} value={y}>
                     {y}
@@ -104,7 +146,7 @@ export default function DescargaRinex() {
             </div>
             <div className="field">
               <label htmlFor="f-month">Mes</label>
-              <select id="f-month" value={filters.month} onChange={onFilterChange('month')}>
+              <select id="f-month" value={filters.month} onChange={onFilterChange('month')} disabled={loadingYear}>
                 <option value="">Todos</option>
                 {months.map((m) => (
                   <option key={m} value={m}>
@@ -115,7 +157,7 @@ export default function DescargaRinex() {
             </div>
             <div className="field">
               <label htmlFor="f-day">Día</label>
-              <select id="f-day" value={filters.day} onChange={onFilterChange('day')}>
+              <select id="f-day" value={filters.day} onChange={onFilterChange('day')} disabled={loadingYear}>
                 <option value="">Todos</option>
                 {days.map((d) => (
                   <option key={d} value={d}>
@@ -126,7 +168,7 @@ export default function DescargaRinex() {
             </div>
             <div className="field">
               <label htmlFor="f-station">Estación</label>
-              <select id="f-station" value={filters.station} onChange={onFilterChange('station')}>
+              <select id="f-station" value={filters.station} onChange={onFilterChange('station')} disabled={loadingYear}>
                 <option value="">Todas</option>
                 {stations.map((s) => (
                   <option key={s} value={s}>
@@ -138,12 +180,14 @@ export default function DescargaRinex() {
           </div>
 
           <div className="rinex-breadcrumb">
-            Mostrando: <span>{pathParts.length ? pathParts.join(' / ') : 'todos los archivos'}</span> · <span>{matched.length + (matched.length === 1 ? ' archivo' : ' archivos')}</span>
+            Mostrando: <span>{pathParts.join(' / ')}</span> · <span>{matched.length + (matched.length === 1 ? ' archivo' : ' archivos')}</span>
           </div>
 
           <div>
             {loading ? (
-              <div className="rinex-empty">Cargando archivos…</div>
+              <div className="rinex-empty">Cargando…</div>
+            ) : loadingYear ? (
+              <div className="rinex-empty">Cargando archivos de {year}…</div>
             ) : matched.length === 0 ? (
               <div className="rinex-empty">No hay archivos que coincidan con ese filtro.</div>
             ) : (

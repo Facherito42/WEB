@@ -25,8 +25,32 @@ cuando IT publique el dominio.
 
 ### Contrato con el frontend (ya implementado, no tocar)
 
-- `GET /rinex-data/rinex.json` → `[{year,month,day,station,filename,size,path}, …]`
+- `GET /rinex-data/index.json` → `{ years:[...], updated, sources }`
+- `GET /rinex-data/y/<AAAA>.json` → archivos de ese año `[{year,month,day,station,filename,size,path,src}, …]`
+- `GET /rinex-data/rinex.json` → (compat) el año más nuevo
 - `GET /rinex-data/raw/<EST>/<AAAA>/<MM>/<DD>/<archivo>` → el archivo, como descarga.
+
+### Dos fuentes de datos
+
+| Fuente | Servidor | Cobertura | En `src` |
+|---|---|---|---|
+| Reciente | FTP anónimo `192.168.100.96` `/regna/<EST>/<AAAA>/<MM>/<DD>/Diario/` | último tiempo | `regna` |
+| Histórico | SFTP `sftp.igm.gub.uy:2222` (`regna`) `/sftpserver/<AAAA>/<MM>/<DD>/<EST>/` | 2018–2024 | `hist` |
+
+El índice se **parte por año** (`y/<AAAA>.json`) para que la página no tenga que
+bajar decenas de MB. El histórico no cambia: se indexa entero una vez
+(`--full`) y el timer solo refresca el FTP reciente + el año en curso.
+
+Config del SFTP en `/opt/rinex-api/.env`: `HIST_HOST`, `HIST_PORT`, `HIST_USER`,
+`HIST_PASS`, `HIST_ROOT`. Con `HIST_HOST` o `HIST_PASS` vacío, la fuente
+histórica queda deshabilitada.
+
+Operación del índice:
+
+```bash
+sudo -u rinex /opt/rinex-api/venv/bin/python -m app.indexer --full   # primera vez / re-pull histórico
+sudo systemctl start rinex-indexer                                   # incremental (lo hace el timer cada 3 h)
+```
 
 ---
 

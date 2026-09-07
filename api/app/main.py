@@ -1,9 +1,11 @@
-"""API de descarga de archivos RINEX (modelo proxy).
+"""API de descarga de archivos RINEX (modelo proxy, índice partido por año).
 
-- GET /rinex-data/rinex.json      -> índice cacheado (generado por indexer.py)
-- GET /rinex-data/raw/<path>      -> trae el archivo del FTP interno y lo sirve
+- GET /rinex-data/index.json        -> { years:[...], updated, sources }
+- GET /rinex-data/y/<AAAA>.json     -> archivos de ese año
+- GET /rinex-data/rinex.json        -> (compat) el año más nuevo
+- GET /rinex-data/raw/<path>        -> trae el archivo de la fuente que corresponda
 
-El path debe existir en el índice: la API nunca abre rutas arbitrarias del FTP.
+El path debe existir en el índice del año: la API nunca abre rutas arbitrarias.
 """
 import json
 import re
@@ -16,8 +18,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from . import config
-from .ftputil import ftp_conn
+from . import config, sources
 
 app = FastAPI(title="RINEX API", docs_url=None, redoc_url=None, openapi_url=None)
 
@@ -71,6 +72,8 @@ _PATH_RE = re.compile(r"[A-Za-z0-9]{3,9}/\d{4}/\d{2}/\d{2}/[A-Za-z0-9._-]+")
 _ftp_slots = threading.Semaphore(config.MAX_CONCURRENT_FTP)
 _locks_guard = threading.Lock()
 _locks: dict[str, threading.Lock] = {}
+_year_cache: dict[int, tuple[float, dict[str, dict]]] = {}
+_year_cache_lock = threading.Lock()
 
 
 def _path_lock(rel: str) -> threading.Lock:
@@ -82,12 +85,24 @@ def _valid(rel: str) -> bool:
     return bool(_PATH_RE.fullmatch(rel)) and ".." not in rel
 
 
-def _manifest_paths() -> set[str]:
+def _year_entries(year: int) -> dict[str, dict]:
+    """{path: entry} del archivo del año, cacheado por mtime."""
+    yf = config.YEAR_DIR / f"{year}.json"
     try:
-        data = json.loads(config.MANIFEST.read_text("utf-8"))
+        mt = yf.stat().st_mtime
     except FileNotFoundError:
-        return set()
-    return {e["path"] for e in data}
+        return {}
+    with _year_cache_lock:
+        hit = _year_cache.get(year)
+        if hit and hit[0] == mt:
+            return hit[1]
+    try:
+        data = {e["path"]: e for e in json.loads(yf.read_text("utf-8"))}
+    except (json.JSONDecodeError, OSError):
+        return {}
+    with _year_cache_lock:
+        _year_cache[year] = (mt, data)
+    return data
 
 
 def _cache_evict() -> None:
@@ -101,9 +116,11 @@ def _cache_evict() -> None:
         f.unlink(missing_ok=True)
 
 
-def _fetch_from_ftp(rel: str, dest) -> None:
-    est, yr, mo, dy, fn = rel.split("/")
-    remote = f"{config.FTP_ROOT}/{est}/{yr}/{mo}/{dy}/{config.FTP_SUBDIR}/{fn}"
+def _fetch(entry: dict, dest) -> None:
+    source = sources.get_source(entry.get("src", "regna"))
+    if source is None:
+        raise HTTPException(502, "Fuente de datos no disponible.")
+
     limit = config.MAX_FILE_MB * 1024 * 1024
     written = 0
     tmp = dest.with_suffix(dest.suffix + ".part")
@@ -112,7 +129,7 @@ def _fetch_from_ftp(rel: str, dest) -> None:
     if not _ftp_slots.acquire(timeout=60):
         raise HTTPException(503, "Servidor ocupado, probá en unos segundos.")
     try:
-        with ftp_conn() as ftp, open(tmp, "wb") as fh:
+        with open(tmp, "wb") as fh:
             def _write(chunk: bytes):
                 nonlocal written
                 written += len(chunk)
@@ -120,7 +137,7 @@ def _fetch_from_ftp(rel: str, dest) -> None:
                     raise ValueError("archivo demasiado grande")
                 fh.write(chunk)
 
-            ftp.retrbinary(f"RETR {remote}", _write, blocksize=1 << 16)
+            source.fetch(entry["path"], _write, limit)
     except HTTPException:
         raise
     except Exception:
@@ -133,29 +150,66 @@ def _fetch_from_ftp(rel: str, dest) -> None:
     _cache_evict()
 
 
-@app.get("/rinex-data/rinex.json")
-def manifest(request: Request):
+# --------------------------------------------------------------------------- #
+# Índice
+# --------------------------------------------------------------------------- #
+@app.get("/rinex-data/index.json")
+def index_json(request: Request):
     if not _rate_ok(_client_ip(request), config.RATE_MANIFEST):
         raise HTTPException(429, "Demasiadas peticiones. Probá en un minuto.")
-    if not config.MANIFEST.exists():
+    if not config.INDEX_FILE.exists():
         raise HTTPException(503, "El índice todavía no se generó.")
-    return FileResponse(config.MANIFEST, media_type="application/json")
+    return FileResponse(config.INDEX_FILE, media_type="application/json")
 
 
+@app.get("/rinex-data/y/{year}.json")
+def year_json(request: Request, year: int):
+    if not _rate_ok(_client_ip(request), config.RATE_MANIFEST):
+        raise HTTPException(429, "Demasiadas peticiones. Probá en un minuto.")
+    if not 2000 <= year <= 2100:
+        raise HTTPException(404, "Año inválido.")
+    yf = config.YEAR_DIR / f"{year}.json"
+    if not yf.exists():
+        raise HTTPException(404, "No hay datos para ese año.")
+    return FileResponse(yf, media_type="application/json")
+
+
+@app.get("/rinex-data/rinex.json")
+def legacy_manifest(request: Request):
+    """Compat: devuelve el año más nuevo disponible."""
+    if not _rate_ok(_client_ip(request), config.RATE_MANIFEST):
+        raise HTTPException(429, "Demasiadas peticiones. Probá en un minuto.")
+    try:
+        idx = json.loads(config.INDEX_FILE.read_text("utf-8"))
+        newest = max(idx["years"])
+    except Exception:
+        raise HTTPException(503, "El índice todavía no se generó.")
+    yf = config.YEAR_DIR / f"{newest}.json"
+    if not yf.exists():
+        raise HTTPException(503, "El índice todavía no se generó.")
+    return FileResponse(yf, media_type="application/json")
+
+
+# --------------------------------------------------------------------------- #
+# Descarga
+# --------------------------------------------------------------------------- #
 @app.get("/rinex-data/raw/{rel:path}")
 def download(request: Request, rel: str):
     if not _rate_ok(_client_ip(request), config.RATE_DOWNLOAD):
         raise HTTPException(429, "Demasiadas descargas. Probá en un minuto.")
     if not _valid(rel):
         raise HTTPException(400, "Ruta inválida.")
-    if rel not in _manifest_paths():
+
+    year = int(rel.split("/")[1])
+    entry = _year_entries(year).get(rel)
+    if entry is None:
         raise HTTPException(404, "Archivo no encontrado en el índice.")
 
     local = config.CACHE_DIR / rel
     if not local.exists():
-        with _path_lock(rel):  # dos requests del mismo archivo -> una sola descarga
+        with _path_lock(rel):
             if not local.exists():
-                _fetch_from_ftp(rel, local)
+                _fetch(entry, local)
 
     return FileResponse(
         local,
@@ -166,10 +220,15 @@ def download(request: Request, rel: str):
 
 @app.get("/healthz")
 def health():
-    m = config.MANIFEST
-    return JSONResponse(
-        {
-            "manifest": m.exists(),
-            "age_min": round((time.time() - m.stat().st_mtime) / 60) if m.exists() else None,
-        }
-    )
+    try:
+        idx = json.loads(config.INDEX_FILE.read_text("utf-8"))
+        return JSONResponse(
+            {
+                "ok": True,
+                "years": idx.get("years", []),
+                "updated": idx.get("updated"),
+                "sources": idx.get("sources", {}),
+            }
+        )
+    except Exception:
+        return JSONResponse({"ok": False, "years": []}, status_code=503)

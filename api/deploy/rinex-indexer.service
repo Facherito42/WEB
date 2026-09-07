@@ -1,5 +1,5 @@
 [Unit]
-Description=Reconstruye el índice RINEX (rinex.json) desde el FTP
+Description=Reconstruye el índice RINEX (index.json + y/<año>.json) desde las fuentes
 
 [Service]
 Type=oneshot
@@ -8,6 +8,8 @@ Group=rinex
 WorkingDirectory=/opt/rinex-api
 EnvironmentFile=/opt/rinex-api/.env
 ExecStart=/opt/rinex-api/venv/bin/python -m app.indexer
+# El primer run (o --full) recorre el SFTP histórico entero: puede tardar mucho.
+TimeoutStartSec=infinity
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
